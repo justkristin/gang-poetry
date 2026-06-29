@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Gang Poetry</title>
   <link rel="icon" href="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
@@ -372,6 +375,21 @@
         async saveLine() {
           if (!this.currentContent.trim() || this.saving) return;
           this.saving = true;
+
+          // Check line is still available before saving
+          const { data: freshLine } = await supabaseClient
+                    .from('gp_lines')
+            .select('is_locked, contributor_cookie')
+            .eq('id', this.lines.find(l => 
+              l.line_number === this.currentLineNumber).id)
+            .single();
+        
+          if (freshLine?.is_locked) {
+            this.saving = false;
+            this.raceConditionWarning = true;
+            await this.loadPoem(this.poem.slug);
+            return;
+          }
 
           const cookieId = getCookieId();
           const line = this.lines.find(l => l.line_number === this.currentLineNumber);
