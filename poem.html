@@ -461,26 +461,38 @@
             .in('id', ids);
         },
 
-        async completePoem() {
-          // Generate title from first 3 words + last 3 words
-          const firstLine = this.lines[0].content || '';
-          const lastLine = this.currentContent.trim();
+async completePoem() {
+  // Fetch the actual saved first and last lines from DB
+  const { data: firstLine } = await supabaseClient
+    .from('gp_lines')
+    .select('content')
+    .eq('poem_id', this.poem.id)
+    .eq('line_number', 1)
+    .single();
 
-          const firstWords = firstLine.trim().split(/\s+/).slice(0, 3).join(' ');
-          const lastWords = lastLine.split(/\s+/).slice(-3).join(' ');
-          const title = `${firstWords}… ${lastWords}`;
+  const { data: lastLine } = await supabaseClient
+    .from('gp_lines')
+    .select('content')
+    .eq('poem_id', this.poem.id)
+    .eq('line_number', this.poem.total_lines)
+    .single();
 
-          await supabaseClient
-            .from('gp_poems')
-            .update({
-              status: 'complete',
-              completed_at: new Date().toISOString(),
-              title,
-              last_touched: new Date().toISOString()
-            })
-            .eq('id', this.poem.id);
-        },
+  const firstWords = firstLine?.content?.trim()
+    .split(/\s+/).slice(0, 3).join(' ') || '';
+  const lastWords = lastLine?.content?.trim()
+    .split(/\s+/).slice(-3).join(' ') || '';
+  const title = `${firstWords}… ${lastWords}`;
 
+  await supabaseClient
+    .from('gp_poems')
+    .update({
+      status: 'complete',
+      completed_at: new Date().toISOString(),
+      title,
+      last_touched: new Date().toISOString()
+    })
+    .eq('id', this.poem.id);
+}
         copyUrl() {
           navigator.clipboard.writeText(window.location.href)
             .then(() => alert('URL copied!'));
