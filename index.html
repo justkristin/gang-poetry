@@ -1,1 +1,55 @@
-<html><head><title>poop</title></head><body>poop</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gang Poetry</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Our files -->
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/cookies.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <h1>Gang Poetry</h1>
+    <p class="tagline">A collaborative poetry experiment</p>
+  </header>
+
+  <main>
+    <p x-text="status"></p>
+  </main>
+
+  <script>
+    function app() {
+      return {
+        status: 'Connecting...',
+        async init() {
+          try {
+            const { data, error } = await supabaseClient
+              .from('gp_forms')
+              .select('name')
+              .order('name');
+            if (error) throw error;
+            this.status = `Connected! Found ${data.length} poetic forms.`;
+          } catch (err) {
+            this.status = `Connection error: ${err.message}`;
+          }
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
