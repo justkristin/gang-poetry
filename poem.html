@@ -492,7 +492,7 @@ async completePoem() {
       last_touched: new Date().toISOString()
     })
     .eq('id', this.poem.id);
-}
+},
         copyUrl() {
           navigator.clipboard.writeText(window.location.href)
             .then(() => alert('URL copied!'));
