@@ -1,0 +1,277 @@
+/* css/style.css */
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-primary: #741f8a;
+  --color-primary-light: #9b4dab;
+  --color-primary-dark: #4e1560;
+  --color-background: #f8f8f8;
+  --color-surface: #ffffff;
+  --color-text: #222222;
+  --color-text-light: #666666;
+  --color-border: #e0e0e0;
+  --font-serif: 'Lora', serif;
+  --font-sans: 'Lato', sans-serif;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2.5rem;
+  --spacing-xl: 4rem;
+  --max-width: 900px;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* =============================================
+   TYPOGRAPHY
+   ============================================= */
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+h2 {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+h3 {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  font-weight: 400;
+  font-style: italic;
+}
+
+p {
+  margin-bottom: var(--spacing-sm);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+a:hover {
+  border-bottom-color: var(--color-primary-light);
+}
+
+/* =============================================
+   LAYOUT
+   ============================================= */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-sm);
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--spacing-md) 0;
+  margin-bottom: var(--spacing-lg);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.header-favicon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.header-text h1 {
+  font-size: 1.75rem;
+}
+
+.header-text .tagline {
+  font-family: var(--font-sans);
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+/* =============================================
+   TWO COLUMN LAYOUT
+   ============================================= */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media (min-width: 640px) {
+  .two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =============================================
+   PANELS
+   ============================================= */
+.panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-md);
+}
+
+.panel-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--spacing-md) 0;
+}
+
+/* =============================================
+   FORM LIST
+   ============================================= */
+.form-list {
+  list-style: none;
+  margin-bottom: var(--spacing-md);
+}
+
+.form-list li {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.form-list li:last-child {
+  border-bottom: none;
+}
+
+.form-list a {
+  display: block;
+  padding: var(--spacing-sm) 0;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  border-bottom: none;
+}
+
+.form-list a:hover {
+  color: var(--color-primary-light);
+  padding-left: var(--spacing-xs);
+  transition: padding 0.2s ease;
+}
+
+.form-list .form-description {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  font-family: var(--font-sans);
+  display: block;
+  margin-top: 0.25rem;
+  padding-bottom: var(--spacing-xs);
+}
+
+/* =============================================
+   NAV LINKS
+   ============================================= */
+.nav-links {
+  list-style: none;
+}
+
+.nav-links li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.nav-links a {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+/* =============================================
+   ACTIVITY PANEL
+   ============================================= */
+.activity-stat {
+  margin-bottom: var(--spacing-md);
+}
+
+.activity-stat .number {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--color-primary);
+  line-height: 1;
+  display: block;
+}
+
+.activity-stat .label {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.latest-poem {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.latest-poem .form-tag {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  margin-left: var(--spacing-xs);
+}
+
+/* =============================================
+   USER STATUS
+   ============================================= */
+.user-status {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  text-align: center;
+  padding: var(--spacing-sm) 0;
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--spacing-lg);
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-md) 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}

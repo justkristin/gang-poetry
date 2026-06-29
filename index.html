@@ -4,47 +4,188 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gang Poetry</title>
-  
-  <!-- Fonts -->
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
-
-  <!-- Supabase - no defer! Must load before our scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Our files - load after Supabase -->
+  <link rel="stylesheet" href="css/style.css">
   <script src="js/config.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/cookies.js"></script>
-
-  <!-- Alpine.js - defer is fine for Alpine -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  
 </head>
 <body x-data="app()" x-init="init()">
 
   <header>
-    <h1>Gang Poetry</h1>
-    <p class="tagline">A collaborative poetry experiment</p>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1>Gang Poetry</h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <p x-text="status"></p>
+  <main class="container">
+    <div class="two-col">
+
+      <!-- LEFT COLUMN: Start a poem + navigation -->
+      <div>
+        <div class="panel">
+          <h2>Start a poem</h2>
+          <ul class="form-list">
+            <template x-if="loading">
+              <li>Loading forms...</li>
+            </template>
+            <template x-for="form in forms" :key="form.id">
+              <li>
+                <a :href="`new.html?form=${form.id}`">
+                  <span x-text="form.name + (form.variant ? ' (' + form.variant + ')' : '')"></span>
+                  <span class="form-description" x-text="form.description"></span>
+                </a>
+              </li>
+            </template>
+          </ul>
+
+          <hr class="panel-divider">
+
+          <ul class="nav-links">
+            <li><a href="browse.html">Browse completed poems →</a></li>
+            <li><a href="abandoned.html">Adopt an abandoned poem →</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Activity -->
+      <div>
+        <div class="panel">
+          <h2>Activity</h2>
+
+          <div class="activity-stat">
+            <span class="number" x-text="stats.completed"></span>
+            <span class="label">poems completed</span>
+          </div>
+
+          <div class="activity-stat">
+            <span class="number" x-text="stats.inProgress"></span>
+            <span class="label">poems in progress</span>
+          </div>
+
+          <div class="activity-stat">
+            <span class="number" x-text="stats.abandoned"></span>
+            <span class="label">abandoned, waiting for a contributor</span>
+          </div>
+
+          <template x-if="stats.latestTitle">
+            <div>
+              <hr class="panel-divider">
+              <h3>Latest completed</h3>
+              <p class="latest-poem">
+                <a :href="`poem.html?id=${stats.latestSlug}`"
+                   x-text="`&ldquo;${stats.latestTitle}&rdquo;`"></a>
+                <span class="form-tag" x-text="stats.latestForm"></span>
+              </p>
+            </div>
+          </template>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="user-status">
+      <span x-text="userStatus"></span>
+    </div>
+
   </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
 
   <script>
     function app() {
       return {
-        status: 'Connecting...',
+        loading: true,
+        forms: [],
+        stats: {
+          completed: 0,
+          inProgress: 0,
+          abandoned: 0,
+          latestTitle: null,
+          latestSlug: null,
+          latestForm: null
+        },
+        userStatus: '',
+
         async init() {
-          try {
-            const { data, error } = await supabaseClient
-              .from('gp_forms')
-              .select('name')
-              .order('name');
-            if (error) throw error;
-            this.status = `Connected! Found ${data.length} poetic forms.`;
-          } catch (err) {
-            this.status = `Connection error: ${err.message}`;
+          await Promise.all([
+            this.loadForms(),
+            this.loadStats()
+          ]);
+          this.setUserStatus();
+          this.loading = false;
+        },
+
+        async loadForms() {
+          const { data, error } = await supabaseClient
+            .from('gp_forms')
+            .select('id, name, variant, description')
+            .eq('is_public', true)
+            .order('name');
+          if (!error) this.forms = data;
+        },
+
+        async loadStats() {
+          // Completed count
+          const { count: completed } = await supabaseClient
+            .from('gp_poems')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'complete');
+
+          // In progress count
+          const { count: inProgress } = await supabaseClient
+            .from('gp_poems')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'in_progress');
+
+          // Abandoned count (dormant > 7 days)
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - CONFIG.abandonedAfterDays);
+          const { count: abandoned } = await supabaseClient
+            .from('gp_poems')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'in_progress')
+            .lt('last_touched', cutoff.toISOString());
+
+          // Latest completed poem
+          const { data: latest } = await supabaseClient
+            .from('gp_poems')
+            .select('title, slug, gp_forms(name, variant)')
+            .eq('status', 'complete')
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          this.stats = {
+            completed: completed || 0,
+            inProgress: (inProgress || 0) - (abandoned || 0),
+            abandoned: abandoned || 0,
+            latestTitle: latest?.title || null,
+            latestSlug: latest?.slug || null,
+            latestForm: latest ? latest.gp_forms.name : null
+          };
+        },
+
+        setUserStatus() {
+          const cookie = getCookieId();
+          if (cookie) {
+            this.userStatus = `You have a contributor identity. Your poems in progress are linked to this browser.`;
           }
         }
       }
