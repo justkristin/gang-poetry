@@ -383,3 +383,143 @@ footer {
   background-color: var(--color-text-light);
   cursor: not-allowed;
 }
+
+/* =============================================
+   POEM PAGE
+   ============================================= */
+.poem-form {
+  margin-bottom: var(--spacing-xl);
+}
+
+.line-group {
+  margin-bottom: var(--spacing-sm);
+}
+
+.line-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.line-hint {
+  font-size: 0.75rem;
+  color: var(--color-primary-light);
+  font-style: italic;
+}
+
+.line-input {
+  width: 100%;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.2s ease;
+}
+
+.line-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.line-input:disabled {
+  background-color: var(--color-background);
+  color: var(--color-text-light);
+  cursor: not-allowed;
+}
+
+.line-input.locked {
+  background-color: var(--color-background);
+  color: transparent;
+  text-shadow: 0 0 8px rgba(0,0,0,0.15);
+  letter-spacing: 0.15em;
+}
+
+.line-warning {
+  font-size: 0.8rem;
+  color: #c0392b;
+  margin-top: 0.25rem;
+  font-family: var(--font-sans);
+}
+
+.line-ok {
+  font-size: 0.8rem;
+  color: #27ae60;
+  margin-top: 0.25rem;
+  font-family: var(--font-sans);
+}
+
+.rhyme-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-family: var(--font-sans);
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+  margin-left: 0.5rem;
+}
+
+.stanza-break {
+  border: none;
+  border-top: 1px dashed var(--color-border);
+  margin: var(--spacing-md) 0;
+}
+
+.poem-complete {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.poem-complete h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.revealed-poem {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  line-height: 2;
+  margin: var(--spacing-lg) 0;
+  text-align: left;
+}
+
+.revealed-poem .stanza {
+  margin-bottom: var(--spacing-md);
+}
+
+.share-url {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-sm);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  word-break: break-all;
+  margin: var(--spacing-sm) 0;
+}
+
+.btn-secondary {
+  background: none;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 4px;
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-primary);
+  color: white;
+}

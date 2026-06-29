@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/cookies.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/syllables.js"></script>
+  <script src="js/rhyme.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Loading -->
+    <template x-if="loading">
+      <p>Loading poem...</p>
+    </template>
+
+    <!-- Error -->
+    <template x-if="error">
+      <div class="panel">
+        <p x-text="error"></p>
+        <p><a href="index.html">← Back to home</a></p>
+      </div>
+    </template>
+
+    <!-- Already contributed last line -->
+    <template x-if="!loading && !error && justContributed">
+      <div class="panel" style="text-align: center; padding: 2rem;">
+        <h2>Line saved!</h2>
+        <p>You just contributed line <span x-text="justContributedLine"></span>. 
+           Come back when someone else has added the next line!</p>
+        <p style="margin-top: 1rem;">
+          <strong>Share this URL so someone can continue:</strong>
+        </p>
+        <div class="share-url" x-text="window.location.href"></div>
+        <button class="btn-secondary" style="margin-top: 1rem;"
+          @click="copyUrl()">
+          Copy URL
+        </button>
+        <p style="margin-top: 1.5rem;">
+          <a href="index.html">← Back to home</a>
+        </p>
+      </div>
+    </template>
+
+    <!-- Can't contribute - same person as last contributor -->
+    <template x-if="!loading && !error && !justContributed && isLastContributor">
+      <div class="panel" style="text-align: center; padding: 2rem;">
+        <h2>You just contributed!</h2>
+        <p>You wrote the last line. Share this URL and come back 
+           when someone else has continued the poem.</p>
+        <div class="share-url" x-text="window.location.href"></div>
+        <button class="btn-secondary" style="margin-top: 1rem;"
+          @click="copyUrl()">
+          Copy URL
+        </button>
+        <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-light);">
+          Last contributed: <span x-text="lastContributedAt"></span>
+        </p>
+        <p style="margin-top: 1rem;">
+          <a href="index.html">← Back to home</a>
+        </p>
+      </div>
+    </template>
+
+    <!-- Poem complete - revealed! -->
+    <template x-if="!loading && !error && poem && poem.status === 'complete'">
+      <div class="poem-complete">
+        <h2 x-text="poem.title"></h2>
+        <p class="tagline" x-text="formDisplayName"></p>
+
+        <div class="revealed-poem">
+          <template x-for="(stanza, si) in stanzas" :key="si">
+            <div class="stanza">
+              <template x-for="line in stanza" :key="line.line_number">
+                <p x-text="line.content"></p>
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <hr class="panel-divider">
+        <p><a href="browse.html">Browse more completed poems →</a></p>
+        <p><a href="index.html">← Back to home</a></p>
+      </div>
+    </template>
+
+    <!-- Active poem - contribution form -->
+    <template x-if="!loading && !error && !justContributed && !isLastContributor && poem && poem.status === 'in_progress'">
+      <div>
+        <div class="panel" style="margin-bottom: 1.5rem;">
+          <h2 x-text="formDisplayName"></h2>
+          <p style="font-size: 0.85rem; color: var(--color-text-light);">
+            Line <span x-text="currentLineNumber"></span> of 
+            <span x-text="poem.total_lines"></span>
+          </p>
+        </div>
+
+        <div class="panel poem-form">
+          <template x-for="(line, index) in lines" :key="line.line_number">
+            <div>
+              <!-- Stanza break -->
+              <template x-if="needsStanzaBreak(index)">
+                <hr class="stanza-break">
+              </template>
+
+              <div class="line-group">
+                <div class="line-label">
+                  <span>
+                    Line <span x-text="line.line_number"></span>
+                    <template x-if="line.syllable_count_expected">
+                      <span style="color: var(--color-text-light);">
+                        · <span x-text="line.syllable_count_expected"></span> syllables
+                      </span>
+                    </template>
+                    <template x-if="line.syllable_min && line.syllable_max">
+                      <span style="color: var(--color-text-light);">
+                        · <span x-text="line.syllable_min"></span>–<span x-text="line.syllable_max"></span> syllables
+                      </span>
+                    </template>
+                  </span>
+                  <span>
+                    <template x-if="line.rhyme_group && line.rhyme_phonemes">
+                      <span class="rhyme-tag" x-text="`rhymes with: ${line.rhyme_phonemes}`"></span>
+                    </template>
+                    <template x-if="line.rhyme_group && !line.rhyme_phonemes && !line.is_rhyme_determining">
+                      <span class="line-hint" x-text="`${line.rhyme_group} rhyme`"></span>
+                    </template>
+                  </span>
+                </div>
+
+                <!-- Locked line (previous lines) -->
+                <template x-if="line.is_locked">
+                  <input
+                    type="text"
+                    class="line-input locked"
+                    :value="obscureLine(line.content)"
+                    disabled>
+                </template>
+
+                <!-- Current editable line -->
+                <template x-if="!line.is_locked && line.line_number === currentLineNumber">
+                  <div>
+                    <input
+                      type="text"
+                      class="line-input"
+                      x-model="currentContent"
+                      @input="validateLine()"
+                      :placeholder="`Enter line ${line.line_number}...`"
+                      autofocus>
+                    
+                    <!-- Syllable feedback -->
+                    <template x-if="syllableWarning">
+                      <p class="line-warning" x-text="syllableWarning"></p>
+                    </template>
+                    <template x-if="syllableOk && currentContent.trim()">
+                      <p class="line-ok">✓ Syllable count looks good!</p>
+                    </template>
+
+                    <!-- Rhyme feedback -->
+                    <template x-if="rhymeWarning">
+                      <p class="line-warning" x-text="rhymeWarning"></p>
+                    </template>
+                  </div>
+                </template>
+
+                <!-- Future lines (not yet reached) -->
+                <template x-if="!line.is_locked && line.line_number !== currentLineNumber">
+                  <input
+                    type="text"
+                    class="line-input"
+                    disabled
+                    placeholder="———">
+                </template>
+
+              </div>
+            </div>
+          </template>
+
+          <!-- Save button -->
+          <div style="text-align: center; margin-top: var(--spacing-md);">
+            <button
+              class="btn-primary"
+              @click="saveLine()"
+              :disabled="saving || !currentContent.trim()"
+              x-text="saving ? 'Saving...' : 'Save this line →'">
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </template>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+  <script>
+    function app() {
+      return {
+        loading: true,
+        error: null,
+        poem: null,
+        lines: [],
+        form: null,
+        formDisplayName: '',
+        currentLineNumber: null,
+        currentContent: '',
+        syllableWarning: null,
+        syllableOk: false,
+        rhymeWarning: null,
+        isLastContributor: false,
+        lastContributedAt: '',
+        justContributed: false,
+        justContributedLine: null,
+        saving: false,
+        stanzas: [],
+
+        async init() {
+          const params = new URLSearchParams(window.location.search);
+          const slug = params.get('id');
+
+          if (!slug) {
+            this.error = 'No poem found. Please check your URL.';
+            this.loading = false;
+            return;
+          }
+
+          refreshCookie();
+          await this.loadPoem(slug);
+          this.loading = false;
+        },
+
+        async loadPoem(slug) {
+          // Load poem
+          const { data: poem, error } = await supabaseClient
+            .from('gp_poems')
+            .select('*, gp_forms(name, variant)')
+            .eq('slug', slug)
+            .single();
+
+          if (error || !poem) {
+            this.error = 'Poem not found. Please check your URL.';
+            return;
+          }
+
+          this.poem = poem;
+          this.form = poem.gp_forms;
+          this.formDisplayName = poem.gp_forms.name +
+            (poem.gp_forms.variant
+              ? ' (' + poem.gp_forms.variant.charAt(0).toUpperCase() +
+                poem.gp_forms.variant.slice(1) + ')'
+              : '');
+
+          // Load lines
+          const { data: lines } = await supabaseClient
+            .from('gp_lines')
+            .select('*')
+            .eq('poem_id', poem.id)
+            .order('line_number');
+
+          if (!lines) return;
+          this.lines = lines;
+
+          if (poem.status === 'complete') {
+            this.buildStanzas();
+            return;
+          }
+
+          // Find current line (first unlocked)
+          const currentLine = lines.find(l => !l.is_locked);
+          if (currentLine) {
+            this.currentLineNumber = currentLine.line_number;
+          }
+
+          // Check if current user was last contributor
+          const cookieId = getCookieId();
+          const lastLocked = [...lines]
+            .reverse()
+            .find(l => l.is_locked);
+
+          if (lastLocked && lastLocked.contributor_cookie === cookieId) {
+            this.isLastContributor = true;
+            this.lastContributedAt = new Date(lastLocked.contributed_at)
+              .toLocaleString();
+          }
+        },
+
+        buildStanzas() {
+          if (!this.form || !this.poem.stanza_count) {
+            this.stanzas = [this.lines];
+            return;
+          }
+          const linesPerStanza = this.poem.total_lines / this.poem.stanza_count;
+          const stanzas = [];
+          for (let i = 0; i < this.poem.stanza_count; i++) {
+            stanzas.push(
+              this.lines.slice(i * linesPerStanza, (i + 1) * linesPerStanza)
+            );
+          }
+          this.stanzas = stanzas;
+        },
+
+        needsStanzaBreak(index) {
+          if (!this.poem?.stanza_count || this.poem.stanza_count <= 1) return false;
+          const linesPerStanza = this.poem.total_lines / this.poem.stanza_count;
+          return index > 0 && index % linesPerStanza === 0;
+        },
+
+        obscureLine(content) {
+          if (!content) return '';
+          return content.split(' ').map(word => '·'.repeat(word.length)).join(' ');
+        },
+
+        async validateLine() {
+          const line = this.lines.find(l => l.line_number === this.currentLineNumber);
+          if (!line || !this.currentContent.trim()) {
+            this.syllableWarning = null;
+            this.syllableOk = false;
+            this.rhymeWarning = null;
+            return;
+          }
+
+          // Syllable check
+          const sylCheck = checkSyllables(
+            this.currentContent,
+            line.syllable_count_expected,
+            line.syllable_min,
+            line.syllable_max
+          );
+          this.syllableWarning = sylCheck.ok ? null : sylCheck.message;
+          this.syllableOk = sylCheck.ok;
+
+          // Rhyme check
+          if (line.rhyme_group && line.rhyme_phonemes && !line.is_rhyme_determining) {
+            const rhymeCheck = await checkRhymes(
+              this.currentContent,
+              line.rhyme_phonemes
+            );
+            this.rhymeWarning = rhymeCheck.ok ? null : rhymeCheck.message;
+          }
+        },
+
+        async saveLine() {
+          if (!this.currentContent.trim() || this.saving) return;
+          this.saving = true;
+
+          const cookieId = getCookieId();
+          const line = this.lines.find(l => l.line_number === this.currentLineNumber);
+          if (!line) return;
+
+          // Get rhyme signature if this is a rhyme-determining line
+          let rhymePhonemes = null;
+          if (line.is_rhyme_determining) {
+            rhymePhonemes = await getRhymeSignature(this.currentContent);
+          }
+
+          // Update this line
+          const { error: lineError } = await supabaseClient
+            .from('gp_lines')
+            .update({
+              content: this.currentContent.trim(),
+              contributor_cookie: cookieId,
+              rhyme_phonemes: rhymePhonemes,
+              syllable_count_actual: countLineSyllables(this.currentContent),
+              is_locked: true,
+              contributed_at: new Date().toISOString()
+            })
+            .eq('id', line.id);
+
+          if (lineError) {
+            this.error = 'Something went wrong saving your line. Please try again.';
+            this.saving = false;
+            return;
+          }
+
+          // If rhyme-determining, propagate rhyme hint to sibling lines
+          if (line.is_rhyme_determining && rhymePhonemes) {
+            await this.propagateRhyme(line, rhymePhonemes);
+          }
+
+          // Check if this was the last line
+          const isLastLine = this.currentLineNumber === this.poem.total_lines;
+
+          if (isLastLine) {
+            await this.completePoem();
+          } else {
+            // Update last_touched on poem
+            await supabaseClient
+              .from('gp_poems')
+              .update({ last_touched: new Date().toISOString() })
+              .eq('id', this.poem.id);
+          }
+
+          this.justContributed = true;
+          this.justContributedLine = this.currentLineNumber;
+          this.saving = false;
+        },
+
+        async propagateRhyme(determiningLine, rhymePhonemes) {
+          // Find all lines in this poem with the same rhyme_group
+          // that aren't yet locked and aren't the determining line
+          const siblingLines = this.lines.filter(l =>
+            l.rhyme_group === determiningLine.rhyme_group &&
+            l.line_number !== determiningLine.line_number &&
+            !l.is_locked
+          );
+
+          if (!siblingLines.length) return;
+
+          const ids = siblingLines.map(l => l.id);
+          await supabaseClient
+            .from('gp_lines')
+            .update({ rhyme_phonemes: rhymePhonemes })
+            .in('id', ids);
+        },
+
+        async completePoem() {
+          // Generate title from first 3 words + last 3 words
+          const firstLine = this.lines[0].content || '';
+          const lastLine = this.currentContent.trim();
+
+          const firstWords = firstLine.trim().split(/\s+/).slice(0, 3).join(' ');
+          const lastWords = lastLine.split(/\s+/).slice(-3).join(' ');
+          const title = `${firstWords}… ${lastWords}`;
+
+          await supabaseClient
+            .from('gp_poems')
+            .update({
+              status: 'complete',
+              completed_at: new Date().toISOString(),
+              title,
+              last_touched: new Date().toISOString()
+            })
+            .eq('id', this.poem.id);
+        },
+
+        copyUrl() {
+          navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('URL copied!'));
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
