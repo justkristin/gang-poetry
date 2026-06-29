@@ -275,3 +275,111 @@ footer {
   font-size: 0.8rem;
   color: var(--color-text-light);
 }
+
+/* =============================================
+   NEW POEM PAGE
+   ============================================= */
+.example-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.example-toggle:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.example-title {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.example-text {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--color-text);
+  border-left: 3px solid var(--color-primary-light);
+  padding-left: 1rem;
+  margin: 0;
+}
+
+.stanza-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.stanza-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: none;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stanza-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.stanza-btn.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.stanza-info {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 0;
+}
+
+.how-it-works {
+  padding-left: 1.25rem;
+}
+
+.how-it-works li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.panel-warning {
+  border-color: #c0392b;
+  background-color: #fdf0ee;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 2rem;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-light);
+}
+
+.btn-primary:disabled {
+  background-color: var(--color-text-light);
+  cursor: not-allowed;
+}

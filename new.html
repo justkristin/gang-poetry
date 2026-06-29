@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start a Poem · Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/cookies.js"></script>
+  <script src="js/utils.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/word-roots-field-guide/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Loading state -->
+    <template x-if="loading">
+      <p>Loading form...</p>
+    </template>
+
+    <!-- Error state -->
+    <template x-if="error">
+      <div class="panel">
+        <p x-text="error"></p>
+        <p><a href="index.html">← Back to home</a></p>
+      </div>
+    </template>
+
+    <!-- Main content -->
+    <template x-if="!loading && !error && form">
+      <div>
+
+        <!-- Form header -->
+        <div class="panel" style="margin-bottom: 1.5rem;">
+          <h2 x-text="formDisplayName"></h2>
+          <p x-text="form.description"></p>
+
+          <!-- Collapsible example -->
+          <div style="margin-top: 1rem;">
+            <button 
+              class="example-toggle"
+              @click="showExample = !showExample"
+              x-text="showExample ? 'Hide example ▲' : 'See an example ▼'">
+            </button>
+            <div x-show="showExample" x-transition style="margin-top: 1rem;">
+              <p class="example-title" x-text="form.example_title"></p>
+              <pre class="example-text" x-text="form.example_text"></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stanza count selector (ballad only) -->
+        <template x-if="form.has_variable_length">
+          <div class="panel" style="margin-bottom: 1.5rem;">
+            <h2>How many stanzas?</h2>
+            <p>Each stanza has 4 lines. More stanzas means more contributors.</p>
+            <div class="stanza-selector">
+              <template x-for="n in [1,2,3,4,5,6]" :key="n">
+                <button
+                  class="stanza-btn"
+                  :class="{ active: stanzaCount === n }"
+                  @click="stanzaCount = n"
+                  x-text="n">
+                </button>
+              </template>
+            </div>
+            <p class="stanza-info" x-text="`${stanzaCount * 4} lines · ${stanzaCount * 4} contributors`"></p>
+          </div>
+        </template>
+
+        <!-- How it works -->
+        <div class="panel" style="margin-bottom: 1.5rem;">
+          <h2>How it works</h2>
+          <ul class="how-it-works">
+            <li>You'll contribute the first line.</li>
+            <li>Save the URL and share it — the next contributor adds the second line without seeing yours.</li>
+            <li>Each line locks after it's saved and can't be edited.</li>
+            <li>The same person can't contribute two lines in a row.</li>
+            <li>When the last line is saved, the full poem is revealed.</li>
+          </ul>
+        </div>
+
+        <!-- Limit warning -->
+        <template x-if="atLimit">
+          <div class="panel panel-warning" style="margin-bottom: 1.5rem;">
+            <p>You have <strong x-text="CONFIG.maxOpenPoems"></strong> poems in progress — the maximum. Finish or abandon one before starting another.</p>
+            <p><a href="index.html">← Back to home</a></p>
+          </div>
+        </template>
+
+        <!-- Start button -->
+        <template x-if="!atLimit">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
+            <button
+              class="btn-primary"
+              @click="startPoem()"
+              :disabled="starting"
+              x-text="starting ? 'Starting...' : 'Start this poem →'">
+            </button>
+          </div>
+        </template>
+
+      </div>
+    </template>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+  <script>
+    function app() {
+      return {
+        loading: true,
+        error: null,
+        form: null,
+        formDisplayName: '',
+        showExample: false,
+        stanzaCount: 2,
+        atLimit: false,
+        starting: false,
+
+        async init() {
+          const params = new URLSearchParams(window.location.search);
+          const formId = params.get('form');
+
+          if (!formId) {
+            this.error = 'No form selected. Please go back and choose a form.';
+            this.loading = false;
+            return;
+          }
+
+          // Refresh cookie on every page load
+          refreshCookie();
+
+          await Promise.all([
+            this.loadForm(formId),
+            this.checkLimit()
+          ]);
+
+          this.loading = false;
+        },
+
+        async loadForm(formId) {
+          const { data, error } = await supabaseClient
+            .from('gp_forms')
+            .select('*')
+            .eq('id', formId)
+            .single();
+
+          if (error || !data) {
+            this.error = 'Form not found. Please go back and choose a form.';
+            return;
+          }
+
+          this.form = data;
+          this.formDisplayName = data.name +
+            (data.variant ? ' (' + data.variant.charAt(0).toUpperCase() +
+            data.variant.slice(1) + ')' : '');
+        },
+
+        async checkLimit() {
+          const cookieId = getCookieId();
+          if (!cookieId) return;
+
+          const { count } = await supabaseClient
+            .from('gp_poems')
+            .select('*', { count: 'exact', head: true })
+            .eq('initiator_cookie', cookieId)
+            .eq('status', 'in_progress');
+
+          this.atLimit = (count || 0) >= CONFIG.maxOpenPoems;
+        },
+
+        async startPoem() {
+          this.starting = true;
+          const cookieId = getCookieId();
+          const slug = generateSlug();
+
+          // Calculate total lines
+          const totalLines = this.form.has_variable_length
+            ? this.stanzaCount * this.form.lines_per_stanza
+            : await this.getTotalLines();
+
+          // Insert poem
+          const { data: poem, error: poemError } = await supabaseClient
+            .from('gp_poems')
+            .insert({
+              slug,
+              form_id: this.form.id,
+              status: 'in_progress',
+              stanza_count: this.form.has_variable_length ? this.stanzaCount : null,
+              total_lines: totalLines,
+              initiator_cookie: cookieId
+            })
+            .select()
+            .single();
+
+          if (poemError) {
+            this.error = 'Something went wrong starting the poem. Please try again.';
+            this.starting = false;
+            return;
+          }
+
+          // Insert empty lines (snapshot)
+          await this.createLines(poem.id, totalLines);
+
+          // Redirect to poem page
+          window.location.href = `poem.html?id=${slug}`;
+        },
+
+        async getTotalLines() {
+          const { count } = await supabaseClient
+            .from('gp_form_line_templates')
+            .select('*', { count: 'exact', head: true })
+            .eq('form_id', this.form.id);
+          return count || 0;
+        },
+
+        async createLines(poemId, totalLines) {
+          // Get line templates for this form
+          const { data: templates } = await supabaseClient
+            .from('gp_form_line_templates')
+            .select(`
+              line_number,
+              stanza_position,
+              refrain_source_line,
+              gp_line_templates (
+                syllable_count,
+                syllable_min,
+                syllable_max,
+                rhyme_group,
+                is_rhyme_determining,
+                foot_type,
+                feet_count,
+                is_refrain
+              )
+            `)
+            .eq('form_id', this.form.id)
+            .order('line_number');
+
+          if (!templates) return;
+
+          // For variable length forms, repeat the stanza template
+          let lineRows = [];
+
+          if (this.form.stanza_template_only) {
+            for (let stanza = 0; stanza < this.stanzaCount; stanza++) {
+              templates.forEach(t => {
+                lineRows.push({
+                  poem_id: poemId,
+                  line_number: (stanza * this.form.lines_per_stanza) + t.line_number,
+                  stanza_position: t.stanza_position,
+                  syllable_count_expected: t.gp_line_templates.syllable_count,
+                  syllable_min: t.gp_line_templates.syllable_min,
+                  syllable_max: t.gp_line_templates.syllable_max,
+                  rhyme_group: t.gp_line_templates.rhyme_group
+                    ? `${t.gp_line_templates.rhyme_group}${stanza + 1}`
+                    : null,
+                  is_rhyme_determining: t.gp_line_templates.is_rhyme_determining,
+                  foot_type: t.gp_line_templates.foot_type,
+                  feet_count: t.gp_line_templates.feet_count,
+                  is_refrain: t.gp_line_templates.is_refrain,
+                  is_locked: false
+                });
+              });
+            }
+          } else {
+            lineRows = templates.map(t => ({
+              poem_id: poemId,
+              line_number: t.line_number,
+              stanza_position: t.stanza_position,
+              syllable_count_expected: t.gp_line_templates.syllable_count,
+              syllable_min: t.gp_line_templates.syllable_min,
+              syllable_max: t.gp_line_templates.syllable_max,
+              rhyme_group: t.gp_line_templates.rhyme_group,
+              is_rhyme_determining: t.gp_line_templates.is_rhyme_determining,
+              foot_type: t.gp_line_templates.foot_type,
+              feet_count: t.gp_line_templates.feet_count,
+              is_refrain: t.gp_line_templates.is_refrain,
+              is_locked: false
+            }));
+          }
+
+          // Insert all lines
+          await supabaseClient
+            .from('gp_lines')
+            .insert(lineRows);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
