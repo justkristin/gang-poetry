@@ -349,9 +349,8 @@
 
         obscureLine(content) {
           if (!content) return '';
-          return content.split(' ').map(word => '·'.repeat(word.length)).join(' ');
-        },
-
+          return content.replace(/[a-zA-Z]/g, '·');
+        }
         async validateLine() {
           const line = this.lines.find(l => l.line_number === this.currentLineNumber);
           if (!line || !this.currentContent.trim()) {
