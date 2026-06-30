@@ -523,3 +523,60 @@ footer {
   background-color: var(--color-primary);
   color: white;
 }
+
+/* =============================================
+   BROWSE PAGE
+   ============================================= */
+.browse-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .browse-controls {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.poem-list {
+  list-style: none;
+}
+
+.poem-list-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.poem-list-item:last-child {
+  border-bottom: none;
+}
+
+.poem-list-item a {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+.poem-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}
+
+.meta-divider {
+  margin: 0 0.4rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.page-info {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
