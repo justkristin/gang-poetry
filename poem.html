@@ -112,6 +112,14 @@
       </div>
     </template>
 
+    <!-- Race condition warning -->
+    <template x-if="raceConditionWarning">
+      <div class="panel panel-warning" style="margin-bottom: 1.5rem;">
+        <p>Someone else just contributed that line while you were writing! 
+           The poem has moved on — please check the updated hint below and try again.</p>
+      </div>
+    </template>
+
     <!-- Active poem - contribution form -->
     <template x-if="!loading && !error && !justContributed && !isLastContributor && poem && poem.status === 'in_progress'">
       <div>
@@ -246,6 +254,7 @@
         justContributedLine: null,
         saving: false,
         stanzas: [],
+        raceConditionWarning: false,
 
         async init() {
           const params = new URLSearchParams(window.location.search);
@@ -496,7 +505,7 @@ async completePoem() {
         copyUrl() {
           navigator.clipboard.writeText(window.location.href)
             .then(() => alert('URL copied!'));
-        },
+        }
       }
     }
   </script>
