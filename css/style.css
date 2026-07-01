@@ -598,7 +598,7 @@ footer {
 
 .visibility-option {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   padding: var(--spacing-sm);
   border: 1px solid var(--color-border);
@@ -631,6 +631,7 @@ footer {
 .visibility-option-text strong {
   font-family: var(--font-serif);
   color: var(--color-text);
+  display: block;
 }
 
 .visibility-option-text span {
