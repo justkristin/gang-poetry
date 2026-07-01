@@ -195,6 +195,8 @@
           await Promise.all([
             this.loadForms(),
             this.loadStats()
+            this.loadUserPoems(),
+            this.loadDisplayName
           ]);
           this.setUserStatus();
           this.loading = false;
