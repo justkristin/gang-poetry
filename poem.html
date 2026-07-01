@@ -255,6 +255,7 @@
         saving: false,
         stanzas: [],
         raceConditionWarning: false,
+        pollInterval: null,
 
         async init() {
           const params = new URLSearchParams(window.location.search);
@@ -269,6 +270,7 @@
           refreshCookie();
           await this.loadPoem(slug);
           this.loading = false;
+          this.startPolling();
         },
 
         async loadPoem(slug) {
@@ -500,6 +502,22 @@ async completePoem() {
       last_touched: new Date().toISOString()
     })
     .eq('id', this.poem.id);
+},
+startPolling() {
+  this.pollInterval = setInterval(async () => {
+    if (document.hidden) return;
+    if (this.poem?.status === 'complete') {
+      clearInterval(this.pollInterval);
+      return;
+    }
+    if (this.justContributed) return;
+    const slug = new URLSearchParams(window.location.search).get('id');
+    if (slug) await this.loadPoem(slug);
+  }, 15000);
+},
+
+stopPolling() {
+  if (this.pollInterval) clearInterval(this.pollInterval);
 },
         copyUrl() {
           navigator.clipboard.writeText(window.location.href)

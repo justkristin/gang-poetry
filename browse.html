@@ -125,11 +125,13 @@
         formFilter: '',
         page: 0,
         hasMore: false,
+        pollInterval: null,
 
         async init() {
           await this.loadForms();
           await this.loadPoems();
           this.loading = false;
+          thie.startPolling();
         },
 
         async loadForms() {
@@ -198,7 +200,18 @@
             month: 'short',
             day: 'numeric'
           });
-        }
+        },
+
+        startPolling() {
+          this.pollInterval = setInterval(async () => {
+            if (document.hidden) return;
+            await this.loadPoems();
+          }, 60000);
+        },
+
+        stopPolling() {
+          if (this.pollInterval) clearInterval(this.pollInterval);
+        },
       }
     }
   </script>

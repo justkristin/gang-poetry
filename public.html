@@ -83,7 +83,7 @@
               <div class="poem-meta">
                 <span x-text="poem.became_public_at ? 'Rescued from dormancy' : 'Started public'"></span>
                 <span class="meta-divider">·</span>
-                <span x-text="`Last contributed ${formatDate(poem.last_touched)}`"></span>
+                <span x-text="`Last contribution ${formatDate(poem.last_touched)}`"></span>
               </div>
             </li>
           </template>
@@ -130,12 +130,14 @@
         sortBy: 'last_touched',
         page: 0,
         hasMore: false,
+        pollInterval: null,
 
         async init() {
           refreshCookie();
           await this.loadForms();
           await this.loadPoems();
           this.loading = false;
+          this.startPolling();
         },
 
         async loadForms() {
@@ -239,7 +241,18 @@
             day: 'numeric',
             year: 'numeric'
           });
-        }
+        },
+
+        startPolling() {
+          this.pollInterval = setInterval(async () => {
+            if (document.hidden) return;
+            await this.loadPoems();
+          }, 30000);
+        },
+
+        stopPolling() {
+          if (this.pollInterval) clearInterval(this.pollInterval);
+        },
       }
     }
   </script>
