@@ -56,7 +56,7 @@ async function checkRhymes(line, rhymeWord) {
       ok,
       message: ok
         ? null
-        : `"${lastWord}" may not rhyme with "${rhymeWord}" — but you can proceed if you disagree!`
+        : `"${lastWord}" may not rhyme with "${rhymeWord}"; If this is intentional, please feel free to save anyway.`
     };
   } catch (err) {
     console.warn('Rhyme check unavailable:', err);

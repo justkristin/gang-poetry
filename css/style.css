@@ -392,7 +392,7 @@ footer {
 }
 
 .line-group {
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .line-label {
@@ -401,7 +401,7 @@ footer {
   font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;

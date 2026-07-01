@@ -129,8 +129,12 @@
             Line <span x-text="currentLineNumber"></span> of 
             <span x-text="poem.total_lines"></span>
           </p>
+          <p style="font-size: 0.85rem; color: var(--color-text-light); margin-top: 0.25rem;"
+             x-text="poem.visibility === 'public' 
+               ? 'Public · listed on Join a Gang (Poem)' 
+               : 'Invite-only · share this URL to invite contributors'">
+          </p>
         </div>
-
         <div class="panel poem-form">
           <template x-for="(line, index) in lines" :key="line.line_number">
             <div>
