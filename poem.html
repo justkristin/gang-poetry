@@ -283,6 +283,7 @@
             .from('gp_poems')
             .select('*, gp_forms(name, variant)')
             .eq('slug', slug)
+            .gt('total_lines', 0);
             .single();
 
           if (error || !poem) {
@@ -304,6 +305,7 @@
             .select('*')
             .eq('poem_id', poem.id)
             .order('line_number');
+            .gt('line_number', 0);
 
           if (!lines) return;
           this.lines = lines;
@@ -444,6 +446,9 @@
 
           if (isLastLine) {
             await this.completePoem();
+            // Reload to show the completed poem reveal
+            await this.loadPoem(this.poem.slug);
+            return;
           } else {
             // Update last_touched on poem
             await supabaseClient
@@ -476,28 +481,22 @@
         },
 
 async completePoem() {
-  // Fetch the actual saved first and last lines from DB
   const { data: firstLine } = await supabaseClient
     .from('gp_lines')
     .select('content')
     .eq('poem_id', this.poem.id)
     .eq('line_number', 1)
+    .gt('line_number', 0)  // cache buster
     .single();
 
-  const { data: lastLine } = await supabaseClient
-    .from('gp_lines')
-    .select('content')
-    .eq('poem_id', this.poem.id)
-    .eq('line_number', this.poem.total_lines)
-    .single();
-
+  // Use currentContent for last line since we just saved it
   const firstWords = firstLine?.content?.trim()
     .split(/\s+/).slice(0, 3).join(' ') || '';
-  const lastWords = lastLine?.content?.trim()
+  const lastWords = this.currentContent.trim()
     .split(/\s+/).slice(-3).join(' ') || '';
   const title = `${firstWords}… ${lastWords}`;
 
-  await supabaseClient
+  const { error } = await supabaseClient
     .from('gp_poems')
     .update({
       status: 'complete',
@@ -506,7 +505,12 @@ async completePoem() {
       last_touched: new Date().toISOString()
     })
     .eq('id', this.poem.id);
+
+  if (error) {
+    console.error('completePoem error:', error);
+  }
 },
+
 startPolling() {
   this.pollInterval = setInterval(async () => {
     if (document.hidden) return;
