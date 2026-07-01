@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Join a Gang (Poem) · Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/cookies.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <h2 style="margin-bottom: 1rem;">Join a Gang (Poem)</h2>
+    <p style="color: var(--color-text-light); margin-bottom: 1.5rem; font-size: 0.95rem;">
+      These poems are looking for contributors. Pick one and add the next line!
+    </p>
+
+    <!-- Filters -->
+    <div class="panel" style="margin-bottom: 1.5rem;">
+      <div class="browse-controls">
+        <select class="line-input" x-model="formFilter" @change="resetAndLoad()">
+          <option value="">All forms</option>
+          <template x-for="form in forms" :key="form.id">
+            <option :value="form.id" x-text="form.name + (form.variant ? ' (' + form.variant + ')' : '')"></option>
+          </template>
+        </select>
+        <select class="line-input" x-model="sortBy" @change="resetAndLoad()">
+          <option value="last_touched">Recently active</option>
+          <option value="created_at">Newest first</option>
+          <option value="progress">Most complete</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <template x-if="loading">
+      <p>Loading poems...</p>
+    </template>
+
+    <!-- No results -->
+    <template x-if="!loading && poems.length === 0">
+      <div class="panel" style="text-align: center; padding: 2rem;">
+        <p>No public poems in progress right now<span x-show="formFilter"> in that form</span>.</p>
+        <p style="margin-top: 1rem;"><a href="new.html">Start one? →</a></p>
+        <p style="margin-top: 0.5rem;"><a href="index.html">← Back to home</a></p>
+      </div>
+    </template>
+
+    <!-- Poem list -->
+    <template x-if="!loading && poems.length > 0">
+      <div>
+        <ul class="poem-list">
+          <template x-for="poem in poems" :key="poem.id">
+            <li class="poem-list-item">
+              <a :href="`poem.html?id=${poem.slug}`">
+                <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                <span class="progress-tag" x-text="`Line ${poem.lines_contributed} of ${poem.total_lines}`"></span>
+              </a>
+              <div class="poem-meta">
+                <span x-text="poem.became_public_at ? 'Rescued from dormancy' : 'Started public'"></span>
+                <span class="meta-divider">·</span>
+                <span x-text="`Last contributed ${formatDate(poem.last_touched)}`"></span>
+              </div>
+            </li>
+          </template>
+        </ul>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button
+            class="btn-secondary"
+            @click="prevPage()"
+            :disabled="page === 0">
+            ← Previous
+          </button>
+          <span class="page-info" x-text="`Page ${page + 1}`"></span>
+          <button
+            class="btn-secondary"
+            @click="nextPage()"
+            :disabled="!hasMore">
+            Next →
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <p style="margin-top: 1.5rem;"><a href="index.html">← Back to home</a></p>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+  <script>
+    const PAGE_SIZE = 20;
+
+    function app() {
+      return {
+        loading: true,
+        poems: [],
+        forms: [],
+        formFilter: '',
+        sortBy: 'last_touched',
+        page: 0,
+        hasMore: false,
+
+        async init() {
+          refreshCookie();
+          await this.loadForms();
+          await this.loadPoems();
+          this.loading = false;
+        },
+
+        async loadForms() {
+          const { data } = await supabaseClient
+            .from('gp_forms')
+            .select('id, name, variant')
+            .eq('is_public', true)
+            .order('name');
+          this.forms = data || [];
+        },
+
+        async resetAndLoad() {
+          this.page = 0;
+          await this.loadPoems();
+        },
+
+        async loadPoems() {
+          this.loading = true;
+
+          // Build sort order
+          const ascending = false;
+          let orderColumn = 'last_touched';
+          if (this.sortBy === 'created_at') orderColumn = 'created_at';
+          if (this.sortBy === 'last_touched') orderColumn = 'last_touched';
+
+          let query = supabaseClient
+            .from('gp_poems')
+            .select(`
+              id,
+              slug,
+              total_lines,
+              last_touched,
+              created_at,
+              became_public_at,
+              visibility,
+              gp_forms(name, variant),
+              gp_lines(id, is_locked)
+            `)
+            .eq('status', 'in_progress')
+            .eq('visibility', 'public')
+            .order(orderColumn, { ascending })
+            .range(this.page * PAGE_SIZE, (this.page * PAGE_SIZE) + PAGE_SIZE);
+
+          if (this.formFilter) {
+            query = query.eq('form_id', this.formFilter);
+          }
+
+          const { data, error } = await query;
+
+          if (error) {
+            console.error('Error loading poems:', error);
+            this.poems = [];
+            this.loading = false;
+            return;
+          }
+
+          // Calculate lines contributed from locked lines count
+          const processed = (data || []).slice(0, PAGE_SIZE).map(poem => ({
+            ...poem,
+            lines_contributed: poem.gp_lines
+              ? poem.gp_lines.filter(l => l.is_locked).length
+              : 0
+          }));
+
+          // Sort by progress if selected
+          if (this.sortBy === 'progress') {
+            processed.sort((a, b) => {
+              const aProgress = a.lines_contributed / a.total_lines;
+              const bProgress = b.lines_contributed / b.total_lines;
+              return bProgress - aProgress;
+            });
+          }
+
+          this.hasMore = data.length > PAGE_SIZE;
+          this.poems = processed;
+          this.loading = false;
+        },
+
+        async nextPage() {
+          if (!this.hasMore) return;
+          this.page++;
+          await this.loadPoems();
+        },
+
+        async prevPage() {
+          if (this.page === 0) return;
+          this.page--;
+          await this.loadPoems();
+        },
+
+        formatDate(dateStr) {
+          if (!dateStr) return '';
+          const date = new Date(dateStr);
+          const now = new Date();
+          const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+          if (diffDays === 0) return 'today';
+          if (diffDays === 1) return 'yesterday';
+          if (diffDays < 7) return `${diffDays} days ago`;
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
