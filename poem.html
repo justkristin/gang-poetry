@@ -283,7 +283,7 @@
             .from('gp_poems')
             .select('*, gp_forms(name, variant)')
             .eq('slug', slug)
-            .gt('total_lines', 0);
+            .gt('total_lines', 0)
             .single();
 
           if (error || !poem) {
