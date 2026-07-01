@@ -579,3 +579,62 @@ footer {
   font-size: 0.85rem;
   color: var(--color-text-light);
 }
+
+/* =============================================
+   VISIBILITY SELECTOR
+   ============================================= */
+.visibility-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .visibility-options {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.visibility-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.visibility-option:hover {
+  border-color: var(--color-primary-light);
+}
+
+.visibility-option.active {
+  border-color: var(--color-primary);
+  background-color: #f9f0fb;
+}
+
+.visibility-option input[type="radio"] {
+  margin-top: 0.2rem;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.visibility-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.visibility-option-text strong {
+  font-family: var(--font-serif);
+  color: var(--color-text);
+}
+
+.visibility-option-text span {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  line-height: 1.4;
+}

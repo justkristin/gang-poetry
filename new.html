@@ -90,6 +90,27 @@
           </div>
         </template>
 
+        <!-- Visibility selector -->
+                <div class="panel" style="margin-bottom: 1.5rem;">
+          <h2>Who can find this poem?</h2>
+          <div class="visibility-options">
+            <label class="visibility-option" :class="{ active: visibility === 'unlisted' }">
+              <input type="radio" name="visibility" value="unlisted" x-model="visibility">
+              <div class="visibility-option-text">
+                <strong>Invite-only</strong>
+                <span>Only people you share the URL with can find and contribute to this poem.</span>
+              </div>
+            </label>
+            <label class="visibility-option" :class="{ active: visibility === 'public' }">
+              <input type="radio" name="visibility" value="public" x-model="visibility">
+              <div class="visibility-option-text">
+                <strong>Public</strong>
+                <span>Listed openly on "Join a Gang (Poem)" for anyone to contribute to.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <!-- How it works -->
         <div class="panel" style="margin-bottom: 1.5rem;">
           <h2>How it works</h2>
@@ -144,6 +165,7 @@
         stanzaCount: 2,
         atLimit: false,
         starting: false,
+        visibility: 'unlisted',
 
         async init() {
           const params = new URLSearchParams(window.location.search);
@@ -216,7 +238,8 @@
               status: 'in_progress',
               stanza_count: this.form.has_variable_length ? this.stanzaCount : null,
               total_lines: totalLines,
-              initiator_cookie: cookieId
+              initiator_cookie: cookieId,
+              visibility: this.visibility
             })
             .select()
             .single();
