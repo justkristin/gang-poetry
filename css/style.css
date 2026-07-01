@@ -639,3 +639,20 @@ footer {
   color: var(--color-text-light);
   line-height: 1.4;
 }
+
+/* =============================================
+   PUBLIC / JOIN PAGE
+   ============================================= */
+.progress-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-light);
+  margin-left: 0.5rem;
+}
+
+.poem-list-item a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
