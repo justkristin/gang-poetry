@@ -98,7 +98,65 @@
       </div>
 
     </div>
-
+    <!-- Your poems -->
+    <template x-if="userPoems.length > 0">
+      <div class="panel" style="margin-top: 1.5rem;">
+    
+        <!-- Name greeting -->
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+          <h2>
+            <span x-show="displayName" x-text="`${displayName}'s poems`"></span>
+            <span x-show="!displayName">Your poems</span>
+          </h2>
+          <button
+            class="example-toggle"
+            @click="showNameInput = !showNameInput"
+            x-text="displayName ? 'Change name' : 'Set your name'">
+          </button>
+        </div>
+    
+        <!-- Name input -->
+        <div x-show="showNameInput" style="margin-bottom: 1rem;">
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <input
+              type="text"
+              class="line-input"
+              x-model="nameInput"
+              placeholder="What should we call you?"
+              maxlength="40"
+              style="flex: 1;">
+            <button
+              class="btn-primary"
+              @click="saveName()"
+              :disabled="!nameInput.trim()"
+              style="white-space: nowrap;">
+              Save
+            </button>
+            <button
+              class="btn-secondary"
+              @click="showNameInput = false">
+              Cancel
+            </button>
+          </div>
+        </div>
+    
+        <!-- Poem list -->
+        <ul class="poem-list">
+          <template x-for="poem in userPoems" :key="poem.slug">
+            <li class="poem-list-item">
+              <a :href="`poem.html?id=${poem.slug}`">
+                <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                <span class="progress-tag" x-text="poem.status === 'complete' ? '✓ Complete' : 'In progress'"></span>
+              </a>
+              <div class="poem-meta">
+                <span x-text="poem.role === 'started' ? 'Started by you' : 'Contributed to'"></span>
+              </div>
+            </li>
+          </template>
+        </ul>
+    
+      </div>
+    </template>
     <div class="user-status">
       <span x-text="userStatus"></span>
     </div>
@@ -126,6 +184,12 @@
         },
         userStatus: '',
         pollInterval: null,
+        userPoems: [],
+        filteredUserPoems: [],
+        displayName: '',
+        showNameInput: false,
+        nameInput: '',
+        poemFilter: 'all',
 
         async init() {
           await Promise.all([
@@ -191,11 +255,133 @@
             this.userStatus = `You have a contributor identity. Your poems in progress are linked to this browser.`;
           }
         },
+        async loadUserPoems() {
+          const cookieId = getCookieId();
+          if (!cookieId) return;
+
+          // Poems user started
+          const { data: started } = await supabaseClient
+            .from('gp_poems')
+            .select('slug, status, total_lines, gp_forms(name, variant)')
+            .eq('initiator_cookie', cookieId)
+            .order('created_at', { ascending: false });
+        
+          // Poems user contributed to
+          const { data: contributed } = await supabaseClient
+            .from('gp_lines')
+            .select('poem_id, gp_poems(slug, status, total_lines, initiator_cookie, last_touched, gp_forms(name, variant))')
+            .eq('contributor_cookie', cookieId)
+            .not('content', 'is', null);
+
+          // Get last contributor for each in-progress poem
+          const { data: lastLines } = await supabaseClient
+            .from('gp_lines')
+            .select('poem_id, contributor_cookie')
+            .eq('is_locked', true)
+            .order('line_number', { ascending: false });
+        
+          // Build a map of poem_id → last contributor cookie
+          const lastContributorMap = {};
+          (lastLines || []).forEach(l => {
+            if (!lastContributorMap[l.poem_id]) {
+              lastContributorMap[l.poem_id] = l.contributor_cookie;
+            }
+          });
+        
+          const startedSlugs = new Set((started || []).map(p => p.slug));
+        
+          const contributedPoems = (contributed || [])
+            .map(l => l.gp_poems)
+            .filter(p => p && !startedSlugs.has(p.slug));
+        
+          const uniqueContributed = contributedPoems.filter((p, index, self) =>
+            index === self.findIndex(t => t.slug === p.slug)
+          );
+        
+          const allPoems = [
+            ...(started || []).map(p => ({ ...p, role: 'started' })),
+            ...uniqueContributed.map(p => ({ ...p, role: 'contributed' }))
+          ];
+        
+          // Add emoji and myTurn flag to each poem
+          this.userPoems = allPoems.map(p => {
+            const lastContributor = lastContributorMap[p.id] || null;
+            const myTurn = p.status === 'in_progress' && lastContributor !== cookieId;
+            let emoji = '✨';
+            if (p.status === 'complete') {
+              emoji = '✨';
+            } else if (myTurn) {
+              emoji = '✍️';
+            } else {
+              emoji = '⏳';
+            }
+            if (p.role === 'started' && p.status !== 'complete') {
+              // started poems keep their turn emoji but also track initiated
+            }
+            return { ...p, myTurn, emoji };
+          });
+        
+          this.filterPoems();
+        },
+        
+        filterPoems() {
+          const cookieId = getCookieId();
+          switch (this.poemFilter) {
+            case 'myturn':
+              this.filteredUserPoems = this.userPoems.filter(p => p.myTurn);
+              break;
+            case 'waiting':
+              this.filteredUserPoems = this.userPoems.filter(p => 
+                p.status === 'in_progress' && !p.myTurn);
+              break;
+            case 'initiated':
+              this.filteredUserPoems = this.userPoems.filter(p => p.role === 'started');
+              break;
+            case 'complete':
+              this.filteredUserPoems = this.userPoems.filter(p => p.status === 'complete');
+              break;
+            default:
+              this.filteredUserPoems = this.userPoems;
+          }
+        },
+        
+        async loadDisplayName() {
+          const cookieId = getCookieId();
+          if (!cookieId) return;
+        
+          const { data } = await supabaseClient
+            .from('gp_contributor_names')
+            .select('display_name')
+            .eq('cookie_id', cookieId)
+            .single();
+        
+          this.displayName = data?.display_name || '';
+          this.nameInput = this.displayName;
+        },
+        
+        async saveName() {
+          const cookieId = getCookieId();
+          if (!cookieId || !this.nameInput.trim()) return;
+        
+          const { error } = await supabaseClient
+            .from('gp_contributor_names')
+            .upsert({
+              cookie_id: cookieId,
+              display_name: this.nameInput.trim(),
+              updated_at: new Date().toISOString()
+            });
+        
+          if (!error) {
+            this.displayName = this.nameInput.trim();
+            this.showNameInput = false;
+          }
+        },
 
         startPolling() {
           this.pollInterval = setInterval(async () => {
             if (document.hidden) return;
             await this.loadStats();
+            await this.loadUserPoems();
           }, 60000);
         },
 
