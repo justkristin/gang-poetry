@@ -304,7 +304,7 @@
             .from('gp_lines')
             .select('*')
             .eq('poem_id', poem.id)
-            .order('line_number');
+            .order('line_number')
             .gt('line_number', 0);
 
           if (!lines) return;
