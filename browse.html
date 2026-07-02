@@ -155,6 +155,7 @@
             .from('gp_poems')
             .select('id, slug, title, completed_at, gp_forms(name, variant)')
             .eq('status', 'complete')
+            .gt('completed_at', '2000-01-01')    // ← cache buster
             .order('completed_at', { ascending: false })
             .range(this.page * PAGE_SIZE, (this.page * PAGE_SIZE) + PAGE_SIZE);
 

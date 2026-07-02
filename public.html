@@ -178,6 +178,7 @@
             `)
             .eq('status', 'in_progress')
             .eq('visibility', 'public')
+            .gt('last_touched', '2000-01-01')    // ← cache buster
             .order(orderColumn, { ascending })
             .range(this.page * PAGE_SIZE, (this.page * PAGE_SIZE) + PAGE_SIZE);
 
