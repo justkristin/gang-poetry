@@ -393,7 +393,7 @@
             .from('gp_contributor_names')
             .select('display_name')
             .eq('cookie_id', cookieId)
-            .single();
+            .maybeSingle();
         
           this.displayName = data?.display_name || '';
           this.nameInput = this.displayName;
