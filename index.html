@@ -349,6 +349,14 @@
             }
             return { ...p, myTurn, emoji };
           });
+
+          // ← ADD THIS LINE HERE
+          console.log('userPoems with myTurn:', this.userPoems.map(p => ({ 
+            slug: p.slug, 
+            myTurn: p.myTurn, 
+            id: p.id,
+            lastContributor: lastContributorMap[p.id]
+          })));
         
           this.filterPoems();
         },
