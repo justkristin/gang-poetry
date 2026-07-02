@@ -268,12 +268,6 @@
             .limit(1)
             .single();
 
-          const currentCookieId = getCookieId();
-          this.userPoems = allPoems.map(p => {
-            const lastContributor = lastContributorMap[p.id] || null;
-            const myTurn = p.status === 'in_progress' && lastContributor !== currentCookieId;
-            console.log(`${p.slug}: status=${p.status}, lastContributor=${lastContributor}, currentCookieId=${currentCookieId}, myTurn=${myTurn}`);
-
           this.stats = {
             completed: completed || 0,
             inProgress: inProgress || 0,
