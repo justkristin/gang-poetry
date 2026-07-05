@@ -656,3 +656,10 @@ footer {
   align-items: baseline;
   gap: 0.5rem;
 }
+
+.poem-title-preview {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}

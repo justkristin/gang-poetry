@@ -292,14 +292,14 @@
           // Poems user started
           const { data: started } = await supabaseClient
             .from('gp_poems')
-            .select('id, slug, status, total_lines, gp_forms(name, variant)')
+            .select('id, slug, status, total_lines, title, gp_forms(name, variant)')
             .eq('initiator_cookie', cookieId)
             .order('created_at', { ascending: false });
         
           // Poems user contributed to
           const { data: contributed } = await supabaseClient
             .from('gp_lines')
-            .select('poem_id, gp_poems(id, slug, status, total_lines, initiator_cookie, last_touched, gp_forms(name, variant))')
+            .select('poem_id, gp_poems(id, slug, status, total_lines, title, initiator_cookie, last_touched, gp_forms(name, variant))')
             .eq('contributor_cookie', cookieId)
             .not('content', 'is', null);
 
