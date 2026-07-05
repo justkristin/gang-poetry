@@ -74,6 +74,7 @@
         <ul class="poem-list">
           <template x-for="poem in poems" :key="poem.id">
             <li class="poem-list-item">
+              <a :href="`poem.html?id=${poem.slug}&t=${Date.now()}`" x-text="poem.title"></a>
               <a :href="`poem.html?id=${poem.slug}`" x-text="poem.title"></a>
               <div class="poem-meta">
                 <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>

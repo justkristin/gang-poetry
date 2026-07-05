@@ -87,7 +87,7 @@
               <hr class="panel-divider">
               <h3>Latest completed</h3>
               <p class="latest-poem">
-                <a :href="`poem.html?id=${stats.latestSlug}`"
+                <a :href="`poem.html?id=${stats.latestSlug}&t=${Date.now()}`"
                    x-text="`&ldquo;${stats.latestTitle}&rdquo;`"></a>
                 <span class="form-tag" x-text="stats.latestForm"></span>
               </p>
@@ -166,7 +166,7 @@
         <ul class="poem-list" x-show="filteredUserPoems.length > 0">
           <template x-for="poem in filteredUserPoems" :key="poem.slug">
             <li class="poem-list-item">
-              <a :href="`poem.html?id=${poem.slug}`">
+              <a :href="`poem.html?id=${poem.slug}&t=${Date.now()}`">
                 <span x-text="poem.emoji"></span>
                 <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
                 <template x-if="poem.status === 'complete' && poem.title">
