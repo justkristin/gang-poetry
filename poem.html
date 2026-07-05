@@ -399,13 +399,15 @@
             .eq('id', this.lines.find(l => 
               l.line_number === this.currentLineNumber).id)
             .single();
-        
           if (freshLine?.is_locked) {
             this.saving = false;
-            this.raceConditionWarning = true;
             await this.loadPoem(this.poem.slug);
+            // If poem is now complete, just show the reveal
+            if (this.poem?.status === 'complete') return;
+            // Otherwise show the warning
+            this.raceConditionWarning = true;
             return;
-          }
+          } 
 
           const cookieId = getCookieId();
           const line = this.lines.find(l => l.line_number === this.currentLineNumber);
