@@ -14,6 +14,7 @@
   <script src="js/config.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/cookies.js"></script>
+  <script src="js/utils.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body x-data="app()" x-init="init()">
@@ -74,8 +75,7 @@
         <ul class="poem-list">
           <template x-for="poem in poems" :key="poem.id">
             <li class="poem-list-item">
-              <a :href="`poem.html?id=${poem.slug}&t=${Date.now()}`" x-text="poem.title"></a>
-              <a :href="`poem.html?id=${poem.slug}`" x-text="poem.title"></a>
+              <a :href="poemUrl(poem.slug)">
               <div class="poem-meta">
                 <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
                 <span class="meta-divider">·</span>

@@ -14,6 +14,7 @@
   <script src="js/config.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/cookies.js"></script>
+  <script src="js/utils.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body x-data="app()" x-init="init()">
@@ -87,7 +88,7 @@
               <hr class="panel-divider">
               <h3>Latest completed</h3>
               <p class="latest-poem">
-                <a :href="`poem.html?id=${stats.latestSlug}&t=${Date.now()}`"
+                <a :href="poemUrl(stats.latestSlug)"
                    x-text="`&ldquo;${stats.latestTitle}&rdquo;`"></a>
                 <span class="form-tag" x-text="stats.latestForm"></span>
               </p>
@@ -166,7 +167,7 @@
         <ul class="poem-list" x-show="filteredUserPoems.length > 0">
           <template x-for="poem in filteredUserPoems" :key="poem.slug">
             <li class="poem-list-item">
-              <a :href="`poem.html?id=${poem.slug}&t=${Date.now()}`">
+              <a :href="poemUrl(poem.slug)">
                 <span x-text="poem.emoji"></span>
                 <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
                 <template x-if="poem.status === 'complete' && poem.title">

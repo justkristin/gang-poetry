@@ -17,6 +17,7 @@
   <script src="js/utils.js"></script>
   <script src="js/syllables.js"></script>
   <script src="js/rhyme.js"></script>
+  <script src="js/utils.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body x-data="app()" x-init="init()">
@@ -528,11 +529,11 @@ startPolling() {
 
 stopPolling() {
   if (this.pollInterval) clearInterval(this.pollInterval);
-},
+},      
         copyUrl() {
-          const baseUrl = window.location.href.split('&t=')[0];
-          const freshUrl = baseUrl + '&t=' + Date.now();
-          navigator.clipboard.writeText(freshUrl)
+          navigator.clipboard.writeText(window.location.origin + 
+            window.location.pathname.replace('poem.html', '') + 
+            poemUrl(this.poem.slug))
             .then(() => alert('URL copied!'));
         }
       }
