@@ -276,6 +276,15 @@
           await this.loadPoem(slug);
           this.loading = false;
           this.startPolling();
+          // Warn if leaving without contributing line 1
+          window.addEventListener('beforeunload', (e) => {
+            if (this.poem?.status === 'in_progress' && 
+                this.currentLineNumber === 1 && 
+                !this.justContributed) {
+              e.preventDefault();
+              e.returnValue = '';
+            }
+          });
         },
 
         async loadPoem(slug) {
