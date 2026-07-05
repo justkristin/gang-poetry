@@ -528,7 +528,9 @@ stopPolling() {
   if (this.pollInterval) clearInterval(this.pollInterval);
 },
         copyUrl() {
-          navigator.clipboard.writeText(window.location.href)
+          const baseUrl = window.location.href.split('&t=')[0];
+          const freshUrl = baseUrl + '&t=' + Date.now();
+          navigator.clipboard.writeText(freshUrl)
             .then(() => alert('URL copied!'));
         }
       }
