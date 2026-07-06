@@ -199,53 +199,6 @@
 
     <div class="user-status">
       <span x-text="userStatus"></span>
-    </div> 
-    
-<!-- Filter pills -->
-        <div class="filter-pills">
-          <button class="filter-pill" :class="{ active: poemFilter === 'all' }"
-            @click="poemFilter = 'all'; filterPoems()">All</button>
-          <button class="filter-pill" :class="{ active: poemFilter === 'myturn' }"
-            @click="poemFilter = 'myturn'; filterPoems()">✍️ My Turn</button>
-          <button class="filter-pill" :class="{ active: poemFilter === 'waiting' }"
-            @click="poemFilter = 'waiting'; filterPoems()">⏳ Waiting</button>
-          <button class="filter-pill" :class="{ active: poemFilter === 'initiated' }"
-            @click="poemFilter = 'initiated'; filterPoems()">🌱 Initiated</button>
-          <button class="filter-pill" :class="{ active: poemFilter === 'complete' }"
-            @click="poemFilter = 'complete'; filterPoems()">✨ Complete</button>
-        </div>
-
-        <!-- No results for filter -->
-        <template x-if="filteredUserPoems.length === 0">
-          <p style="color: var(--color-text-light); font-size: 0.9rem; margin-top: 1rem;">
-            No poems in this category yet.
-          </p>
-        </template>
-
-        <!-- Poem list -->
-        <ul class="poem-list" x-show="filteredUserPoems.length > 0">
-          <template x-for="poem in filteredUserPoems" :key="poem.slug">
-            <li class="poem-list-item">
-              <a :href="poemUrl(poem.slug)">
-                <span x-text="poem.emoji"></span>
-                <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
-                <template x-if="poem.status === 'complete' && poem.title">
-                  <span class="poem-title-preview" x-text="`· \u201c${poem.title}\u201d`"></span>
-                </template>
-                <span class="progress-tag" x-text="poem.status === 'complete' ? '✓ Complete' : (poem.myTurn ? 'Your turn!' : 'Waiting')"></span>
-              </a>
-              <div class="poem-meta">
-                <span x-text="poem.role === 'started' ? '🌱 Initiated by you' : 'Contributed to'"></span>
-              </div>
-            </li>
-          </template>
-        </ul>
-
-
-      </div>
-    </template>
-    <div class="user-status">
-      <span x-text="userStatus"></span>
     </div>
 
   </main>
