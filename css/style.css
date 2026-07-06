@@ -403,14 +403,7 @@ footer {
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.line-hint {
-  font-size: 0.75rem;
-  color: var(--color-primary-light);
-  font-style: italic;
 }
 
 .line-input {
@@ -454,17 +447,6 @@ footer {
   color: #27ae60;
   margin-top: 0.25rem;
   font-family: var(--font-sans);
-}
-
-.rhyme-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-family: var(--font-sans);
-  background-color: var(--color-primary);
-  color: white;
-  border-radius: 3px;
-  padding: 0.1rem 0.4rem;
-  margin-left: 0.5rem;
 }
 
 .stanza-break {

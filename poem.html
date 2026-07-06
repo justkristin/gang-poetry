@@ -152,28 +152,19 @@
               <div class="line-group">
                 <div class="line-label">
                   <span>
-                    Line <span x-text="line.line_number"></span>
+                    <strong>Line <span x-text="line.line_number"></span></strong>
                     <template x-if="line.syllable_count_expected">
-                      <span style="color: var(--color-text-light);">
-                        · <span x-text="line.syllable_count_expected"></span> syllables
-                      </span>
+                      <span>&nbsp; · &nbsp;<span x-text="line.syllable_count_expected"></span> syllables</span>
                     </template>
                     <template x-if="line.syllable_min && line.syllable_max">
-                      <span style="color: var(--color-text-light);">
-                        · <span x-text="line.syllable_min"></span>–<span x-text="line.syllable_max"></span> syllables
-                      </span>
+                      <span>&nbsp; · &nbsp;<span x-text="line.syllable_min"></span>–<span x-text="line.syllable_max"></span> syllables</span>
                     </template>
-                  </span>
-                  <span>
-                    <template x-if="line.rhyme_group && line.rhyme_phonemes">
-                      <span class="rhyme-tag" x-text="`rhymes with: ${line.rhyme_phonemes}`"></span>
+                    <template x-if="getScansionGuide(line.foot_type, line.feet_count)">
+                      <span>&nbsp; · &nbsp;<span x-text="getScansionGuide(line.foot_type, line.feet_count)"></span></span>
                     </template>
-                    <template x-if="line.rhyme_group && !line.rhyme_phonemes && !line.is_rhyme_determining">
-                      <span class="line-hint" x-text="`${line.rhyme_group} rhyme`"></span>
-                    </template>
+                    <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line)"></span></span>
                   </span>
                 </div>
-
                 <!-- Locked line (previous lines) -->
                 <template x-if="line.is_locked">
                   <input
