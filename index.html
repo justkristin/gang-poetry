@@ -26,9 +26,15 @@
              src="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico"
              alt="Crispy the cat">
         <div class="header-text">
-          <h1>Gang Poetry</h1>
+          <h1>Jincy's Gang</h1>
           <p class="tagline">A collaborative poetry experiment</p>
         </div>
+        <nav class="header-nav">
+          <a href="index.html">Home</a>
+          <a href="browse.html">Completed</a>
+          <a href="public.html">Join a Gang</a>
+          <a href="glossary.html">Glossary</a>
+        </nav>
       </div>
     </div>
   </header>
@@ -53,19 +59,12 @@
               </li>
             </template>
           </ul>
-
-          <hr class="panel-divider">
-
-          <ul class="nav-links">
-            <li><a href="browse.html">Browse completed poems →</a></li>
-            <li><a href="public.html">Join a gang (poem) →</a></li>
-          </ul>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Activity -->
+      <!-- RIGHT COLUMN: Activity + Recent activity -->
       <div>
-        <div class="panel">
+        <div class="panel" style="margin-bottom: 1.5rem;">
           <h2>Activity</h2>
 
           <div class="activity-stat">
@@ -89,58 +88,118 @@
               <h3>Latest completed</h3>
               <p class="latest-poem">
                 <a :href="poemUrl(stats.latestSlug)"
-                   x-text="`&ldquo;${stats.latestTitle}&rdquo;`"></a>
+                   x-text="`\u201c${stats.latestTitle}\u201d`"></a>
                 <span class="form-tag" x-text="stats.latestForm"></span>
+              </p>
+              <p style="margin-top: 0.5rem;">
+                <a href="browse.html" style="font-size: 0.85rem;">Browse all completed →</a>
               </p>
             </div>
           </template>
-
         </div>
+
+        <!-- Recent activity -->
+        <template x-if="userPoems.length > 0">
+          <div class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+              <h2>
+                <span x-show="displayName" x-text="`${displayName}\u2019s recent activity`"></span>
+                <span x-show="!displayName">Your recent activity</span>
+              </h2>
+              <button
+                class="example-toggle"
+                @click="showNameInput = !showNameInput"
+                x-text="displayName ? 'Change name' : 'Set your name'">
+              </button>
+            </div>
+
+            <!-- Name input -->
+            <div x-show="showNameInput" style="margin-bottom: 1rem;">
+              <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <input
+                  type="text"
+                  class="line-input"
+                  x-model="nameInput"
+                  placeholder="What should we call you?"
+                  maxlength="40"
+                  style="flex: 1;">
+                <button
+                  class="btn-primary"
+                  @click="saveName()"
+                  :disabled="!nameInput.trim()"
+                  style="white-space: nowrap;">
+                  Save
+                </button>
+                <button
+                  class="btn-secondary"
+                  @click="showNameInput = false">
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter pills -->
+            <div class="filter-pills">
+              <button class="filter-pill" :class="{ active: poemFilter === 'all' }"
+                @click="poemFilter = 'all'; filterPoems()">All</button>
+              <button class="filter-pill" :class="{ active: poemFilter === 'myturn' }"
+                @click="poemFilter = 'myturn'; filterPoems()">✍️ My Turn</button>
+              <button class="filter-pill" :class="{ active: poemFilter === 'waiting' }"
+                @click="poemFilter = 'waiting'; filterPoems()">⏳ Waiting</button>
+              <button class="filter-pill" :class="{ active: poemFilter === 'initiated' }"
+                @click="poemFilter = 'initiated'; filterPoems()">🌱 Initiated</button>
+              <button class="filter-pill" :class="{ active: poemFilter === 'complete' }"
+                @click="poemFilter = 'complete'; filterPoems()">✨ Complete</button>
+            </div>
+
+            <!-- No results for filter -->
+            <template x-if="filteredUserPoems.length === 0">
+              <p style="color: var(--color-text-light); font-size: 0.9rem; margin-top: 1rem;">
+                No poems in this category yet.
+              </p>
+            </template>
+
+            <!-- Poem list - 5 most recent -->
+            <ul class="poem-list" x-show="filteredUserPoems.length > 0">
+              <template x-for="poem in filteredUserPoems.slice(0, 5)" :key="poem.slug">
+                <li class="poem-list-item">
+                  <a :href="poemUrl(poem.slug)">
+                    <span x-text="poem.emoji"></span>
+                    <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                    <template x-if="poem.status === 'complete' && poem.title">
+                      <span class="poem-title-preview" x-text="`· \u201c${poem.title}\u201d`"></span>
+                    </template>
+                    <span class="progress-tag" x-text="poem.status === 'complete' ? '✓ Complete' : (poem.myTurn ? 'Your turn!' : 'Waiting')"></span>
+                  </a>
+                  <div class="poem-meta">
+                    <span x-text="poem.role === 'started' ? '🌱 Initiated by you' : 'Contributed to'"></span>
+                  </div>
+                </li>
+              </template>
+            </ul>
+
+            <p style="margin-top: 0.75rem;">
+              <a href="mypoems.html" style="font-size: 0.85rem;">See all your poems →</a>
+            </p>
+
+          </div>
+        </template>
+
+        <!-- No poems yet -->
+        <template x-if="userPoems.length === 0 && !loading">
+          <div class="panel" style="text-align: center; padding: 1.5rem;">
+            <p style="font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 0.5rem;">Start your first poem!</p>
+            <p style="font-size: 0.85rem; color: var(--color-text-light);">Pick a form on the left and add your voice to the collection.</p>
+          </div>
+        </template>
+
       </div>
 
     </div>
-    <!-- Your poems -->
-    <template x-if="userPoems.length > 0">
-      <div class="panel" style="margin-top: 1.5rem;">
-    
-        <!-- Name greeting -->
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
-          <h2>
-            <span x-show="displayName" x-text="`${displayName}\u2019s poems`"></span>
-            <span x-show="!displayName">Your poems</span>
-          </h2>
-          <button
-            class="example-toggle"
-            @click="showNameInput = !showNameInput"
-            x-text="displayName ? 'Change name' : 'Set your name'">
-          </button>
-        </div>
-    
-        <!-- Name input -->
-        <div x-show="showNameInput" style="margin-bottom: 1rem;">
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <input
-              type="text"
-              class="line-input"
-              x-model="nameInput"
-              placeholder="What should we call you?"
-              maxlength="40"
-              style="flex: 1;">
-            <button
-              class="btn-primary"
-              @click="saveName()"
-              :disabled="!nameInput.trim()"
-              style="white-space: nowrap;">
-              Save
-            </button>
-            <button
-              class="btn-secondary"
-              @click="showNameInput = false">
-              Cancel
-            </button>
-          </div>
-        </div>
-    
+
+    <div class="user-status">
+      <span x-text="userStatus"></span>
+    </div> 
     
 <!-- Filter pills -->
         <div class="filter-pills">
@@ -331,7 +390,11 @@
           const allPoems = [
             ...(started || []).map(p => ({ ...p, role: 'started' })),
             ...uniqueContributed.map(p => ({ ...p, role: 'contributed' }))
-          ];
+          ].sort((a, b) => {
+            const aDate = new Date(a.last_touched || a.created_at || 0);
+            const bDate = new Date(b.last_touched || b.created_at || 0);
+            return bDate - aDate;
+          });
         
           // Add emoji and myTurn flag to each poem
           const currentCookieId = getCookieId();

@@ -663,3 +663,181 @@ footer {
   color: var(--color-text);
   font-size: 0.95rem;
 }
+
+/* =============================================
+   HEADER NAV
+   ============================================= */
+.header-nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.header-nav a {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.header-nav a:hover {
+  color: var(--color-primary);
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    flex-wrap: wrap;
+  }
+
+  .header-nav {
+    width: 100%;
+    margin-left: 0;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+  }
+
+  .header-nav a {
+    background-color: #f0e6f4;
+    color: var(--color-primary);
+    border-radius: 20px;
+    padding: 0.25rem 0.85rem;
+    font-size: 0.8rem;
+    border: none;
+  }
+
+  .header-nav a:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-bottom: none;
+  }
+}
+
+/* =============================================
+   FILTER PILLS (updated - no border)
+   ============================================= */
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filter-pill {
+  background: #f0e6f4;
+  color: var(--color-primary);
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  background-color: var(--color-primary-light);
+  color: white;
+}
+
+.filter-pill.active {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* =============================================
+   GLOSSARY PAGE
+   ============================================= */
+.alpha-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.alpha-links a {
+  background-color: #f0e6f4;
+  color: var(--color-primary);
+  border-radius: 20px;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.alpha-links a:hover {
+  background-color: var(--color-primary);
+  color: white;
+  border-bottom: none;
+}
+
+.glossary-letter {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin: 1.5rem 0 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.glossary-entry {
+  margin-bottom: 0.75rem;
+}
+
+.glossary-term {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.4rem;
+}
+
+.glossary-definition {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.glossary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.glossary-related {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.glossary-related a {
+  color: var(--color-primary-light);
+  border-bottom: none;
+  font-size: 0.8rem;
+}
+
+.glossary-related a:hover {
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-primary-light);
+}
+
+.glossary-more {
+  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-light);
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.glossary-more:hover {
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-primary-light);
+}

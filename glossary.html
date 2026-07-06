@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Glossary · Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/glossary-data.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon" ...>
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+        <nav class="header-nav">
+          <a href="index.html">Home</a>
+          <a href="browse.html">Completed</a>
+          <a href="public.html">Join a Gang</a>
+          <a href="glossary.html">Glossary</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <h2 style="margin-bottom: 0.5rem;">Glossary</h2>
+    <p style="color: var(--color-text-light); margin-bottom: 1.5rem; font-size: 0.95rem;">
+      Poetic terms used in Gang Poetry's forms and hints.
+    </p>
+
+    <!-- Search -->
+    <div class="panel" style="margin-bottom: 1.5rem;">
+      <input
+        type="text"
+        class="line-input"
+        placeholder="Search terms..."
+        x-model="searchTerm"
+        @input="filterTerms()">
+    </div>
+
+    <!-- No results -->
+    <template x-if="filtered.length === 0">
+      <div class="panel" style="text-align: center;">
+        <p>No terms found matching "<span x-text="searchTerm"></span>".</p>
+      </div>
+    </template>
+
+    <!-- Alphabet jump links -->
+    <template x-if="filtered.length > 0">
+      <div class="alpha-links">
+        <template x-for="letter in letters" :key="letter">
+          <a :href="`#letter-${letter}`" x-text="letter"></a>
+        </template>
+      </div>
+    </template>
+
+    <!-- Glossary entries -->
+    <template x-for="(group, index) in groupedFiltered" :key="group.letter">
+      <div>
+        <h3 class="glossary-letter" :id="`letter-${group.letter}`" x-text="group.letter"></h3>
+        <template x-for="entry in group.entries" :key="entry.term">
+          <div class="glossary-entry panel">
+            <div class="glossary-term" x-text="entry.term"></div>
+            <p class="glossary-definition" x-text="entry.definition"></p>
+            <div class="glossary-footer">
+              <template x-if="entry.related && entry.related.length > 0">
+                <div class="glossary-related">
+                  <span>See also: </span>
+                  <template x-for="(rel, ri) in entry.related" :key="rel">
+                    <span>
+                      <a :href="`#letter-${rel[0]}`" x-text="rel"></a><span x-show="ri < entry.related.length - 1">, </span>
+                    </span>
+                  </template>
+                </div>
+              </template>
+              <template x-if="entry.more_info">
+                <a :href="entry.more_info" target="_blank" rel="noopener" class="glossary-more">
+                  Learn more →
+                </a>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <p style="margin-top: 1.5rem;"><a href="index.html">← Back to home</a></p>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+  <script>
+    function app() {
+      return {
+        searchTerm: '',
+        filtered: [],
+        groupedFiltered: [],
+        letters: [],
+
+        init() {
+          this.filterTerms();
+        },
+
+        filterTerms() {
+          const term = this.searchTerm.toLowerCase().trim();
+          this.filtered = term
+            ? GLOSSARY.filter(e =>
+                e.term.toLowerCase().includes(term) ||
+                e.definition.toLowerCase().includes(term)
+              )
+            : [...GLOSSARY];
+
+          this.filtered.sort((a, b) => a.term.localeCompare(b.term));
+          this.buildGroups();
+        },
+
+        buildGroups() {
+          const groups = {};
+          this.filtered.forEach(entry => {
+            const letter = entry.term[0].toUpperCase();
+            if (!groups[letter]) groups[letter] = [];
+            groups[letter].push(entry);
+          });
+
+          this.groupedFiltered = Object.keys(groups)
+            .sort()
+            .map(letter => ({ letter, entries: groups[letter] }));
+
+          this.letters = Object.keys(groups).sort();
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
