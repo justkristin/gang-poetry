@@ -177,9 +177,10 @@
                 </li>
               </template>
             </ul>
-
             <p style="margin-top: 0.75rem;">
-              <a href="mypoems.html" style="font-size: 0.85rem;">See all your poems →</a>
+              <a href="mypoems.html" style="font-size: 0.85rem;" 
+                 x-text="displayName ? `See all ${displayName}\u2019s poems \u2192` : 'See all your poems \u2192'">
+              </a>
             </p>
 
           </div>

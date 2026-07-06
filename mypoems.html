@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Your Poems · Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/cookies.js"></script>
+  <script src="js/utils.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="app()" x-init="init()">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+        <nav class="header-nav">
+          <a href="index.html">Home</a>
+          <a href="browse.html">Completed</a>
+          <a href="public.html">Join a Gang</a>
+          <a href="glossary.html">Glossary</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Page title -->
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+      <h2>
+        <span x-show="displayName" x-text="`${displayName}\u2019s poems`"></span>
+        <span x-show="!displayName">Your poems</span>
+      </h2>
+      <button
+        class="example-toggle"
+        @click="showNameInput = !showNameInput"
+        x-text="displayName ? 'Change name' : 'Set your name'">
+      </button>
+    </div>
+
+    <!-- Name input -->
+    <div x-show="showNameInput" class="panel" style="margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <input
+          type="text"
+          class="line-input"
+          x-model="nameInput"
+          placeholder="What should we call you?"
+          maxlength="40"
+          style="flex: 1;">
+        <button
+          class="btn-primary"
+          @click="saveName()"
+          :disabled="!nameInput.trim()"
+          style="white-space: nowrap;">
+          Save
+        </button>
+        <button
+          class="btn-secondary"
+          @click="showNameInput = false">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- No cookie -->
+    <template x-if="!hasCookie">
+      <div class="panel" style="text-align: center; padding: 2rem;">
+        <p style="font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 0.5rem;">No poems yet!</p>
+        <p style="font-size: 0.85rem; color: var(--color-text-light); margin-bottom: 1rem;">Start or contribute to a poem to see it here.</p>
+        <p><a href="index.html">← Back to home</a></p>
+      </div>
+    </template>
+
+    <!-- Has cookie -->
+    <template x-if="hasCookie">
+      <div>
+
+        <!-- Filter pills -->
+        <div class="filter-pills" style="margin-bottom: 1.5rem;">
+          <button class="filter-pill" :class="{ active: poemFilter === 'all' }"
+            @click="poemFilter = 'all'; filterPoems()">All</button>
+          <button class="filter-pill" :class="{ active: poemFilter === 'myturn' }"
+            @click="poemFilter = 'myturn'; filterPoems()">✍️ My Turn</button>
+          <button class="filter-pill" :class="{ active: poemFilter === 'waiting' }"
+            @click="poemFilter = 'waiting'; filterPoems()">⏳ Waiting</button>
+          <button class="filter-pill" :class="{ active: poemFilter === 'initiated' }"
+            @click="poemFilter = 'initiated'; filterPoems()">🌱 Initiated</button>
+          <button class="filter-pill" :class="{ active: poemFilter === 'complete' }"
+            @click="poemFilter = 'complete'; filterPoems()">✨ Complete</button>
+        </div>
+
+        <!-- Loading -->
+        <template x-if="loading">
+          <p>Loading your poems...</p>
+        </template>
+
+        <!-- No results for filter -->
+        <template x-if="!loading && filteredUserPoems.length === 0">
+          <div class="panel" style="text-align: center; padding: 1.5rem;">
+            <p style="color: var(--color-text-light);">No poems in this category yet.</p>
+          </div>
+        </template>
+
+        <!-- Poem list -->
+        <template x-if="!loading && filteredUserPoems.length > 0">
+          <div>
+            <ul class="poem-list">
+              <template x-for="poem in paginatedPoems" :key="poem.slug">
+                <li class="poem-list-item">
+                  <a :href="poemUrl(poem.slug)">
+                    <span x-text="poem.emoji"></span>
+                    <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                    <template x-if="poem.status === 'complete' && poem.title">
+                      <span class="poem-title-preview" x-text="`· \u201c${poem.title}\u201d`"></span>
+                    </template>
+                    <span class="progress-tag" x-text="poem.status === 'complete' ? '✓ Complete' : (poem.myTurn ? 'Your turn!' : 'Waiting')"></span>
+                  </a>
+                  <div class="poem-meta">
+                    <span x-text="poem.role === 'started' ? '🌱 Initiated by you' : 'Contributed to'"></span>
+                  </div>
+                </li>
+              </template>
+            </ul>
+
+            <!-- Pagination -->
+            <div class="pagination">
+              <button
+                class="btn-secondary"
+                @click="prevPage()"
+                :disabled="page === 0">
+                ← Previous
+              </button>
+              <span class="page-info" x-text="`Page ${page + 1} of ${totalPages}`"></span>
+              <button
+                class="btn-secondary"
+                @click="nextPage()"
+                :disabled="page >= totalPages - 1">
+                Next →
+              </button>
+            </div>
+          </div>
+        </template>
+
+      </div>
+    </template>
+
+    <p style="margin-top: 1.5rem;"><a href="index.html">← Back to home</a></p>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+  <script>
+    const PAGE_SIZE = 20;
+
+    function app() {
+      return {
+        loading: true,
+        hasCookie: false,
+        userPoems: [],
+        filteredUserPoems: [],
+        paginatedPoems: [],
+        displayName: '',
+        showNameInput: false,
+        nameInput: '',
+        poemFilter: 'all',
+        page: 0,
+        totalPages: 1,
+        pollInterval: null,
+
+        async init() {
+          refreshCookie();
+          const cookieId = getCookieId();
+          this.hasCookie = !!cookieId;
+          if (!cookieId) {
+            this.loading = false;
+            return;
+          }
+          await Promise.all([
+            this.loadUserPoems(),
+            this.loadDisplayName()
+          ]);
+          this.loading = false;
+          this.startPolling();
+        },
+
+        async loadUserPoems() {
+          const cookieId = getCookieId();
+          if (!cookieId) return;
+
+          const { data: started } = await supabaseClient
+            .from('gp_poems')
+            .select('id, slug, status, total_lines, title, gp_forms(name, variant)')
+            .eq('initiator_cookie', cookieId)
+            .gt('created_at', '2000-01-01');
+
+          const { data: contributed } = await supabaseClient
+            .from('gp_lines')
+            .select('poem_id, gp_poems(id, slug, status, total_lines, title, initiator_cookie, last_touched, gp_forms(name, variant))')
+            .eq('contributor_cookie', cookieId)
+            .not('content', 'is', null);
+
+          const { data: lastLines } = await supabaseClient
+            .from('gp_lines')
+            .select('poem_id, contributor_cookie')
+            .eq('is_locked', true)
+            .order('line_number', { ascending: false });
+
+          const lastContributorMap = {};
+          (lastLines || []).forEach(l => {
+            if (!lastContributorMap[l.poem_id]) {
+              lastContributorMap[l.poem_id] = l.contributor_cookie;
+            }
+          });
+
+          const startedSlugs = new Set((started || []).map(p => p.slug));
+
+          const contributedPoems = (contributed || [])
+            .map(l => l.gp_poems)
+            .filter(p => p && !startedSlugs.has(p.slug));
+
+          const uniqueContributed = contributedPoems.filter((p, index, self) =>
+            index === self.findIndex(t => t.slug === p.slug)
+          );
+
+          const allPoems = [
+            ...(started || []).map(p => ({ ...p, role: 'started' })),
+            ...uniqueContributed.map(p => ({ ...p, role: 'contributed' }))
+          ].sort((a, b) => {
+            const aDate = new Date(a.last_touched || a.created_at || 0);
+            const bDate = new Date(b.last_touched || b.created_at || 0);
+            return bDate - aDate;
+          });
+
+          const currentCookieId = getCookieId();
+          this.userPoems = allPoems.map(p => {
+            const lastContributor = lastContributorMap[p.id] || null;
+            const myTurn = p.status === 'in_progress' && lastContributor !== currentCookieId;
+            let emoji = '✨';
+            if (p.status === 'complete') {
+              emoji = '✨';
+            } else if (myTurn) {
+              emoji = '✍️';
+            } else {
+              emoji = '⏳';
+            }
+            return { ...p, myTurn, emoji };
+          });
+
+          this.filterPoems();
+        },
+
+        filterPoems() {
+          switch (this.poemFilter) {
+            case 'myturn':
+              this.filteredUserPoems = this.userPoems.filter(p => p.myTurn);
+              break;
+            case 'waiting':
+              this.filteredUserPoems = this.userPoems.filter(p =>
+                p.status === 'in_progress' && !p.myTurn);
+              break;
+            case 'initiated':
+              this.filteredUserPoems = this.userPoems.filter(p => p.role === 'started');
+              break;
+            case 'complete':
+              this.filteredUserPoems = this.userPoems.filter(p => p.status === 'complete');
+              break;
+            default:
+              this.filteredUserPoems = this.userPoems;
+          }
+          this.page = 0;
+          this.paginate();
+        },
+
+        paginate() {
+          this.totalPages = Math.max(1, Math.ceil(this.filteredUserPoems.length / PAGE_SIZE));
+          this.paginatedPoems = this.filteredUserPoems.slice(
+            this.page * PAGE_SIZE,
+            (this.page + 1) * PAGE_SIZE
+          );
+        },
+
+        nextPage() {
+          if (this.page < this.totalPages - 1) {
+            this.page++;
+            this.paginate();
+          }
+        },
+
+        prevPage() {
+          if (this.page > 0) {
+            this.page--;
+            this.paginate();
+          }
+        },
+
+        async loadDisplayName() {
+          const cookieId = getCookieId();
+          if (!cookieId) return;
+
+          const { data } = await supabaseClient
+            .from('gp_contributor_names')
+            .select('display_name')
+            .eq('cookie_id', cookieId)
+            .maybeSingle();
+
+          this.displayName = data?.display_name || '';
+          this.nameInput = this.displayName;
+        },
+
+        async saveName() {
+          const cookieId = getCookieId();
+          if (!cookieId || !this.nameInput.trim()) return;
+
+          const { error } = await supabaseClient
+            .from('gp_contributor_names')
+            .upsert({
+              cookie_id: cookieId,
+              display_name: this.nameInput.trim(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (!error) {
+            this.displayName = this.nameInput.trim();
+            this.showNameInput = false;
+            // Update page title too
+            document.title = `${this.displayName}'s Poems · Gang Poetry`;
+          }
+        },
+
+        startPolling() {
+          this.pollInterval = setInterval(async () => {
+            if (document.hidden) return;
+            await this.loadUserPoems();
+          }, 30000);
+        },
+
+        stopPolling() {
+          if (this.pollInterval) clearInterval(this.pollInterval);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
