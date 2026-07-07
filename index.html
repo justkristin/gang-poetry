@@ -281,6 +281,7 @@
             .eq('status', 'complete')
             .order('completed_at', { ascending: false })
             .limit(1)
+            .gt('completed_at', '2000-01-01')
             .maybeSingle();
 
           this.stats = {
@@ -402,6 +403,7 @@
             .from('gp_contributor_names')
             .select('display_name')
             .eq('cookie_id', cookieId)
+            .gt('completed_at', '2000-01-01')
             .maybeSingle();
         
           this.displayName = data?.display_name || '';
