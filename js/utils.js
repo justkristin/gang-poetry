@@ -10,11 +10,21 @@ function generateSlug(length = 16) {
 function poemUrl(slug) {
   return `poem.html?id=${slug}&t=${Date.now()}`;
 }
-function getRhymeHint(line) {
-  // Haiku - no rhyme groups at all
+function getRhymeHint(line, allLines) {
+  // Haiku - truly unrhymed, no letter
   if (!line.rhyme_group) return 'unrhymed';
   
   const letter = line.rhyme_group.toLowerCase();
+  
+  // Check if any other line shares this rhyme group
+  const groupHasRhyme = allLines.some(l => 
+    l.rhyme_group === line.rhyme_group && l.is_rhyme_determining
+  );
+  
+  // Line has a positional letter but doesn't rhyme
+  if (!groupHasRhyme && !line.is_rhyme_determining) {
+    return `(${letter}) free`;
+  }
   
   // Rhyme-determining line
   if (line.is_rhyme_determining) {
@@ -44,4 +54,7 @@ function getScansionGuide(footType, feetCount) {
   if (!foot) return null;
   
   return Array(feetCount).fill(foot).join('  ');
+}
+function glossaryUrl(formName) {
+  return `glossary.html#letter-${formName.charAt(0).toUpperCase()}`;
 }

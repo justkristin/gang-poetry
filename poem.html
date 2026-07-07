@@ -100,8 +100,14 @@
     <template x-if="!loading && !error && poem && poem.status === 'complete'">
       <div class="poem-complete">
         <h2 x-text="poem.title"></h2>
-        <p class="tagline" x-text="formDisplayName"></p>
-
+          <p class="tagline">
+            <span x-text="formDisplayName"></span>
+            &nbsp; · &nbsp;
+            <a :href="glossaryUrl(formDisplayName)"
+               style="font-size: 0.85rem; color: var(--color-text-light);">
+              about this form →
+            </a>
+          </p>
         <div class="revealed-poem">
           <template x-for="(stanza, si) in stanzas" :key="si">
             <div class="stanza">
@@ -134,6 +140,11 @@
           <p style="font-size: 0.85rem; color: var(--color-text-light);">
             Line <span x-text="currentLineNumber"></span> of 
             <span x-text="poem.total_lines"></span>
+            &nbsp; · &nbsp;
+            <a :href="glossaryUrl(formDisplayName)" 
+               style="font-size: 0.85rem; color: var(--color-text-light);">
+              about this form →
+              </a>
           </p>
           <p style="font-size: 0.85rem; color: var(--color-text-light); margin-top: 0.25rem;"
              x-text="poem.visibility === 'public' 
@@ -162,7 +173,7 @@
                     <template x-if="getScansionGuide(line.foot_type, line.feet_count)">
                       <span>&nbsp; · &nbsp;<span x-text="getScansionGuide(line.foot_type, line.feet_count)"></span></span>
                     </template>
-                    <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line)"></span></span>
+                    <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line, lines)"></span></span>
                   </span>
                 </div>
                 <!-- Locked line (previous lines) -->
