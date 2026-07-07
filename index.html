@@ -281,7 +281,7 @@
             .eq('status', 'complete')
             .order('completed_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           this.stats = {
             completed: completed || 0,
