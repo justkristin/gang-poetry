@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>FAQ · Gang Poetry</title>
+  <link rel="icon" href="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body x-data="{ open: null }">
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <img class="header-favicon"
+             src="https://hyde.flaneurpajamas.com/commonplaces/favicon.ico"
+             alt="Crispy the cat">
+        <div class="header-text">
+          <h1><a href="index.html">Gang Poetry</a></h1>
+          <p class="tagline">A collaborative poetry experiment</p>
+        </div>
+        <nav class="header-nav">
+          <a href="index.html">Home</a>
+          <a href="mypoems.html">My Poems</a>
+          <a href="browse.html">Completed</a>
+          <a href="public.html">Join a Gang</a>
+          <a href="glossary.html">Glossary</a>
+          <a href="faq.html">FAQ</a>
+          <a href="faq.html">FAQ</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <h2 style="margin-bottom: 0.5rem;">Frequently Asked Questions</h2>
+    <p style="color: var(--color-text-light); margin-bottom: 1.5rem; font-size: 0.95rem;">
+      Everything you need to know about gang poetry and this site.
+    </p>
+
+    <div class="faq-list">
+
+      <div class="faq-item" :class="{ open: open === 0 }">
+        <button class="faq-question" @click="open = open === 0 ? null : 0">
+          What is gang poetry?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 0" x-transition>
+          <p>Gang poetry is a collaborative form in which several contributors write a poem together — one line at a time — without seeing what anyone else has written until the poem is complete. Each contributor adds their line in isolation, guided only by the poem's structural requirements (syllable count, rhyme scheme, meter). The result is often surprising, funny, moving, or beautifully strange.</p>
+          <p>It's related to the Surrealist game <em>Exquisite Corpse</em>, and has been played at parties, in classrooms, and among friends for decades. This site makes it easy to play asynchronously — no need to be in the same room.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 1 }">
+        <button class="faq-question" @click="open = open === 1 ? null : 1">
+          How do I start a poem?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 1" x-transition>
+          <p>From the home page, choose a poetic form and click its name. You'll be taken to a page where you can read about the form, see an example, and choose whether your poem is public (anyone can find and join it) or invite-only (only people you share the URL with can contribute). Click "Start this poem" and you'll be taken straight to line 1.</p>
+          <p>Once you've written and saved your line, share the URL with whoever you'd like to contribute next — or leave it public and let the internet do its thing.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 2 }">
+        <button class="faq-question" @click="open = open === 2 ? null : 2">
+          How do I contribute to a poem?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 2" x-transition>
+          <p>Either follow a URL someone shared with you, or visit the <a href="public.html">Join a Gang (Poem)</a> page to find poems that are open for contributions. Click on one and you'll see the form with all previous lines hidden — you can only see hints about the structure (syllable count, rhyme requirements) and dots where the previous lines are.</p>
+          <p>Write your line, check the hints, and click "Save your line." That's it! The same person can't contribute two lines in a row, so share the URL to keep the poem moving.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 3 }">
+        <button class="faq-question" @click="open = open === 3 ? null : 3">
+          Can I see the other lines while I'm writing?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 3" x-transition>
+          <p>No — and that's the whole point! Previous lines are hidden while the poem is in progress. You can see dots indicating the length and punctuation of previous lines, and you'll get hints about rhyme and meter, but the actual words are invisible to you until the last line is saved.</p>
+          <p>This is what makes gang poetry surprising. You're writing in the dark, guided only by structure.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 4 }">
+        <button class="faq-question" @click="open = open === 4 ? null : 4">
+          What happens when the last line is written?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 4" x-transition>
+          <p>The poem is revealed in full to the person who wrote the last line — they're the first to read the whole thing! The poem is then marked complete, given an auto-generated title (the first three words… the last three words), and added to the completed poems listing.</p>
+          <p>Anyone with the URL can then read the finished poem.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 5 }">
+        <button class="faq-question" @click="open = open === 5 ? null : 5">
+          How do I find my poems again?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 5" x-transition>
+          <p>Visit the <a href="mypoems.html">My Poems</a> page — it shows all poems you've started or contributed to, as long as you're using the same browser. You can filter by status (your turn, waiting, complete) and set a display name so your contributions feel more personal.</p>
+          <p>You can also bookmark any poem URL to return to it directly.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 6 }">
+        <button class="faq-question" @click="open = open === 6 ? null : 6">
+          Why don't poems I contributed to show up in my list?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 6" x-transition>
+          <p>This site doesn't use accounts or logins — your identity is stored in a browser cookie. If you're on a different browser, a different device, or your cookies were cleared, the site won't recognize you as the same contributor.</p>
+          <p>There's no way to merge identities across browsers, unfortunately. Think of each browser as a different anonymous contributor.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 7 }">
+        <button class="faq-question" @click="open = open === 7 ? null : 7">
+          Can I use the same name across different browsers?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 7" x-transition>
+          <p>You can set the same display name in different browsers, but the site will still treat them as different contributors. Your name is just a label — it doesn't link your contributions across devices. So even if two browsers both say "Jincy," they're still two separate anonymous identities as far as the poem is concerned.</p>
+          <p>This means the same-person-can't-contribute-twice-in-a-row rule won't catch you if you switch browsers. We're relying on the honour system there. 🙂</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 8 }">
+        <button class="faq-question" @click="open = open === 8 ? null : 8">
+          What do the emoji mean?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 8" x-transition>
+          <p>On your poems list, each poem has an emoji indicating its status:</p>
+          <ul style="margin: 0.5rem 0 0.5rem 1.25rem;">
+            <li><strong>✍️ My Turn</strong> — someone else just contributed, and it's your turn next</li>
+            <li><strong>⏳ Waiting</strong> — you just contributed, and you're waiting for someone else</li>
+            <li><strong>🌱 Initiated</strong> — you started this poem</li>
+            <li><strong>✨ Complete</strong> — the poem is finished and revealed</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 9 }">
+        <button class="faq-question" @click="open = open === 9 ? null : 9">
+          What are the symbols above each line?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 9" x-transition>
+          <p>Those are <strong>scansion symbols</strong> — a visual guide to the poem's rhythmic pattern. <strong>˘</strong> means an unstressed syllable and <strong>/</strong> means a stressed syllable. So <em>˘ /  ˘ /  ˘ /  ˘ /  ˘ /</em> is iambic pentameter — five pairs of unstressed/stressed syllables, the rhythm of Shakespeare's sonnets.</p>
+          <p>They're a guide, not a strict requirement — the app will warn you if your line doesn't match, but you can save it anyway. Poetry is allowed to breathe. See the <a href="glossary.html">Glossary</a>
+          <a href="faq.html">FAQ</a> for more on meter and feet.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 10 }">
+        <button class="faq-question" @click="open = open === 10 ? null : 10">
+          What if someone takes my line while I'm writing?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 10" x-transition>
+          <p>If another contributor saves the line you were working on before you do, the app will let you know and refresh to show the current state of the poem. Your text won't be saved — you'll need to write a new line for the next available position.</p>
+          <p>It's rare, but it can happen if two people are looking at the same poem at the same time. The poem always moves forward — it never loses a line.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 11 }">
+        <button class="faq-question" @click="open = open === 11 ? null : 11">
+          Who do I contact with questions or concerns?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 11" x-transition>
+          <p>You can reach us at <a href="mailto:your@email.com">your@email.com</a>. We'd love to hear from you — especially if something isn't working, or if a poem made you laugh.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="margin-top: 1.5rem;"><a href="index.html">← Back to home</a></p>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Gang poetry is a collaborative form. Each contributor adds one line without seeing the others.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
