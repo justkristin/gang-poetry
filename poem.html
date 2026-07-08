@@ -208,8 +208,19 @@
                     <template x-if="rhymeWarning">
                       <p class="line-warning" x-text="rhymeWarning"></p>
                     </template>
+
+                    <!-- Inline save button -->
+                    <div style="text-align: right; margin-top: 0.5rem;">
+                      <button
+                        class="btn-secondary"
+                        @click="saveLine()"
+                        :disabled="saving || !currentContent.trim()"
+                        x-text="saving ? 'Saving...' : 'Save'">
+                      </button>
+                    </div>
                   </div>
                 </template>
+
 
                 <!-- Future lines (not yet reached) -->
                 <template x-if="!line.is_locked && line.line_number !== currentLineNumber">
@@ -219,7 +230,6 @@
                     disabled
                     placeholder="———">
                 </template>
-
               </div>
             </div>
           </template>
@@ -230,7 +240,7 @@
               class="btn-primary"
               @click="saveLine()"
               :disabled="saving || !currentContent.trim()"
-              x-text="saving ? 'Saving...' : 'Save this line →'">
+              x-text="saving ? 'Saving...' : 'Save your line →'">
             </button>
           </div>
 
