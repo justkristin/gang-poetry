@@ -518,12 +518,7 @@ async completePoem() {
     .gt('line_number', 0)  // cache buster
     .single();
 
-  // Use currentContent for last line since we just saved it
-  const firstWords = firstLine?.content?.trim()
-    .split(/\s+/).slice(0, 3).join(' ') || '';
-  const lastWords = this.currentContent.trim()
-    .split(/\s+/).slice(-3).join(' ') || '';
-  const title = `${firstWords}… ${lastWords}`;
+  const title = firstLine?.content?.trim() || 'Untitled';
 
   const { error } = await supabaseClient
     .from('gp_poems')
