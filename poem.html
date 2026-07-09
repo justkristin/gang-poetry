@@ -118,6 +118,62 @@
           </template>
         </div>
 
+        <!-- Action bar -->
+        <div class="poem-actions">
+          
+          <!-- Like button -->
+          <button
+            class="action-btn like-btn"
+            :class="{ liked: userHasLiked }"
+            @click="toggleLike()">
+            <span x-text="userHasLiked ? '♥' : '♡'"></span>
+            <span x-text="likeCount"></span>
+          </button>
+        
+          <!-- Share button -->
+          <button
+            class="action-btn share-btn"
+            @click="sharePoem()">
+            ↗ Share
+          </button>
+        
+          <!-- Report button -->
+          <template x-if="!userHasReported">
+                    <button
+              class="action-btn report-btn"
+              @click="showReportForm = !showReportForm">
+              ⚑ Report
+            </button>
+          </template>
+                  <template x-if="userHasReported">
+            <span class="action-btn report-btn reported">✓ Reported</span>
+          </template>
+        
+        </div>
+                
+        <!-- Report form -->
+        <div x-show="showReportForm" class="report-form" x-transition>
+          <p style="font-size: 0.85rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
+            Why are you reporting this poem? (optional)
+          </p>
+          <textarea
+            class="report-textarea"
+            x-model="reportReason"
+            placeholder="Tell us what concerns you about this poem..."
+            rows="3">
+          </textarea>
+          <div style="display: flex; gap: 0.75rem; margin-top: 0.75rem;">
+            <button class="btn-primary" @click="submitReport()"
+              style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+              Submit report
+            </button>
+            <button class="btn-secondary" @click="showReportForm = false"
+              style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+              Cancel
+            </button>
+          </div>
+        </div>
+        
         <hr class="panel-divider">
         <p><a href="browse.html">Browse more completed poems →</a></p>
         <p><a href="index.html">← Back to home</a></p>
@@ -278,6 +334,12 @@
         stanzas: [],
         raceConditionWarning: false,
         pollInterval: null,
+        likeCount: 0,
+        userHasLiked: false,
+        userHasReported: false,
+        reportReason: '',
+        showReportForm: false,
+        sharing: false,
 
         async init() {
           const params = new URLSearchParams(window.location.search);
@@ -311,7 +373,7 @@
             .select('*, gp_forms(name, variant)')
             .eq('slug', slug)
             .gt('total_lines', 0)
-            .single();
+            .maybeSingle();
 
           if (error || !poem) {
             this.error = 'Poem not found. Please check your URL.';
@@ -339,6 +401,8 @@
 
           if (poem.status === 'complete') {
             this.buildStanzas();
+            await this.loadLikes();
+            await this.checkReported();
             return;
           }
 
@@ -532,6 +596,135 @@ async completePoem() {
 
   if (error) {
     console.error('completePoem error:', error);
+  }
+},
+
+async loadLikes() {
+  const cookieId = getCookieId();
+  if (!this.poem) return;
+
+  const { count } = await supabaseClient
+    .from('gp_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('poem_id', this.poem.id);
+
+  this.likeCount = count || 0;
+
+  if (cookieId) {
+    const { data } = await supabaseClient
+      .from('gp_likes')
+      .select('poem_id')
+      .eq('poem_id', this.poem.id)
+      .eq('liker_cookie', cookieId)
+      .maybeSingle();
+    this.userHasLiked = !!data;
+  }
+},
+
+async toggleLike() {
+  const cookieId = getCookieId();
+  if (!cookieId || !this.poem) return;
+
+  if (this.userHasLiked) {
+    await supabaseClient
+      .from('gp_likes')
+      .delete()
+      .eq('poem_id', this.poem.id)
+      .eq('liker_cookie', cookieId);
+    this.likeCount--;
+    this.userHasLiked = false;
+  } else {
+    await supabaseClient
+      .from('gp_likes')
+      .insert({
+        poem_id: this.poem.id,
+        liker_cookie: cookieId
+      });
+    this.likeCount++;
+    this.userHasLiked = true;
+  }
+},
+
+async checkReported() {
+  const cookieId = getCookieId();
+  if (!cookieId || !this.poem) return;
+
+  const { data } = await supabaseClient
+    .from('gp_reports')
+    .select('id')
+    .eq('poem_id', this.poem.id)
+    .eq('reporter_cookie', cookieId)
+    .maybeSingle();
+
+  this.userHasReported = !!data;
+},
+
+async submitReport() {
+  const cookieId = getCookieId();
+  if (!cookieId || !this.poem || this.userHasReported) return;
+
+  // Check daily limit (5 reports per cookie per day)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const { count } = await supabaseClient
+    .from('gp_reports')
+    .select('*', { count: 'exact', head: true })
+    .eq('reporter_cookie', cookieId)
+    .gte('created_at', today.toISOString());
+
+  if (count >= 5) {
+    alert('You\'ve reached the maximum number of reports for today. Thank you for helping keep this space safe.');
+    this.showReportForm = false;
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('gp_reports')
+    .insert({
+      poem_id: this.poem.id,
+      reporter_cookie: cookieId,
+      reason: this.reportReason.trim() || null
+    });
+
+  if (!error) {
+    this.userHasReported = true;
+    this.showReportForm = false;
+    this.reportReason = '';
+
+    // Check if poem should be auto-flagged
+    const { count: reportCount } = await supabaseClient
+      .from('gp_reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('poem_id', this.poem.id);
+
+    if (reportCount >= 5) {
+      await supabaseClient
+        .from('gp_poems')
+        .update({ flagged: true })
+        .eq('id', this.poem.id)
+        .eq('reviewed', false);
+    }
+  }
+},
+
+async sharePoem() {
+  const url = window.location.href;
+  const title = this.poem.title;
+  const text = this.lines.map(l => l.content).join('\n');
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        navigator.clipboard.writeText(url)
+          .then(() => alert('URL copied!'));
+      }
+    }
+  } else {
+    navigator.clipboard.writeText(url)
+      .then(() => alert('URL copied!'));
   }
 },
 
