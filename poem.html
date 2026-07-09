@@ -534,6 +534,14 @@
             await this.propagateRhyme(line, rhymePhonemes);
           }
 
+          // If this is line 1, set the title now
+          if (this.currentLineNumber === 1) {
+            await supabaseClient
+              .from('gp_poems')
+              .update({ title: this.currentContent.trim() })
+              .eq('id', this.poem.id);
+          }
+
           // Check if this was the last line
           const isLastLine = this.currentLineNumber === this.poem.total_lines;
 

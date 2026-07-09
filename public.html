@@ -83,8 +83,8 @@
         <ul class="poem-list">
           <template x-for="poem in poems" :key="poem.id">
             <li class="poem-list-item">
-              <a :href="`poem.html?id=${poem.slug}&t=${Date.now()}`">
-                <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+              <a :href="poemUrl(poem.slug)">
+                <span x-text="poem.title ? obscureTitle(poem.title) : poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
                 <span class="progress-tag" x-text="`Line ${poem.lines_contributed} of ${poem.total_lines}`"></span>
               </a>
               <div class="poem-meta">

@@ -58,3 +58,14 @@ function getScansionGuide(footType, feetCount) {
 function glossaryUrl(formName) {
   return `glossary.html#letter-${formName.charAt(0).toUpperCase()}`;
 }
+
+function obscureTitle(title) {
+  if (!title) return null;
+  const words = title.trim().split(/\s+/);
+  if (words.length <= 1) return title; // too short to obscure
+  const lastWord = words[words.length - 1];
+  const obscured = words.slice(0, -1).map(w => 
+    w.replace(/[a-zA-Z]/g, '·')
+  ).join(' ');
+  return `${obscured} ${lastWord}`;
+}
