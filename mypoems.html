@@ -140,6 +140,8 @@
                     <span class="progress-tag" x-text="poem.status === 'complete' ? '✓ Complete' : (poem.myTurn ? 'Your turn!' : 'Waiting')"></span>
                   </a>
                   <div class="poem-meta">
+                    <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                    <span class="meta-divider">·</span>
                     <span x-text="poem.role === 'started' ? '🌱 Initiated by you' : 'Contributed to'"></span>
                   </div>
                 </li>
