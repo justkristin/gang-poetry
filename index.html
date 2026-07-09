@@ -167,7 +167,12 @@
                 <li class="poem-list-item">
                   <a :href="poemUrl(poem.slug)">
                     <span x-text="poem.emoji"></span>
-                    <span x-text="poem.title ? obscureTitle(poem.title) : poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                    <template x-if="poem.status === 'in_progress' && poem.title">
+                      <span x-text="obscureTitle(poem.title)"></span>
+                    </template>
+                    <template x-if="poem.status !== 'in_progress' || !poem.title">
+                      <span x-text="poem.gp_forms.name + (poem.gp_forms.variant ? ' (' + poem.gp_forms.variant + ')' : '')"></span>
+                    </template>
                     <template x-if="poem.status === 'complete' && poem.title">
                       <span class="poem-title-preview" x-text="`· \u201c${poem.title}\u201d`"></span>
                     </template>
