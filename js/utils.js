@@ -14,8 +14,8 @@ function getRhymeHint(line, allLines) {
   // Haiku - truly unrhymed, no letter
   if (!line.rhyme_group) return 'unrhymed';
   
-  const letter = line.rhyme_group.toLowerCase();
-  
+  const letter = line.rhyme_group.replace(/\d+$/, '').toLowerCase(); 
+
   // Check if any other line shares this rhyme group
   const groupHasRhyme = allLines.some(l => 
     l.rhyme_group === line.rhyme_group && l.is_rhyme_determining

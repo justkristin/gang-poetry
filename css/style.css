@@ -399,8 +399,6 @@ footer {
   font-size: 0.75rem;
   color: var(--color-text-light);
   font-family: var(--font-sans);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
