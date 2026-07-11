@@ -200,7 +200,10 @@
 
           // We fetched one extra to check if there's a next page
           this.hasMore = data.length > PAGE_SIZE;
-          this.poems = data.slice(0, PAGE_SIZE);
+          const newPoems = data.slice(0, PAGE_SIZE);
+          if (JSON.stringify(newPoems) !== JSON.stringify(this.poems)) {
+            this.poems = newPoems;
+          }
           this.loading = false;
         },
 

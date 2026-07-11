@@ -375,16 +375,16 @@
             return bDate - aDate;
           });
         
-          // Add emoji and myTurn flag to each poem
+       // Add emoji and myTurn flag to each poem
           const currentCookieId = getCookieId();
-          this.userPoems = allPoems.map(p => {
+          const newUserPoems = allPoems.map(p => {
             const lastContributor = lastContributorMap[p.id] || null;
             const myTurn = p.status === 'in_progress' && lastContributor !== currentCookieId;
             let emoji = '✨';
             if (p.status === 'complete') {
               emoji = '✨';
             } else if (myTurn) {
-              emoji = '✍️';
+              emoji = '✍️ ';
             } else {
               emoji = '⏳';
             }
@@ -394,9 +394,11 @@
             return { ...p, myTurn, emoji };
           });
 
-          this.filterPoems();
-        },
-        
+          if (JSON.stringify(newUserPoems) !== JSON.stringify(this.userPoems)) {
+            this.userPoems = newUserPoems;
+            this.filterPoems();
+          }
+        }, 
         filterPoems() {
           const cookieId = getCookieId();
           switch (this.poemFilter) {

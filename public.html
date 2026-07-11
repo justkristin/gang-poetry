@@ -238,7 +238,10 @@
           }
 
           this.hasMore = data.length > PAGE_SIZE;
-          this.poems = processed;
+          const newPoems = processed;
+          if (JSON.stringify(newPoems) !== JSON.stringify(this.poems)) {
+            this.poems = newPoems;
+          }
           this.loading = false;
         },
 
