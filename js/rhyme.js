@@ -7,7 +7,7 @@ async function getRhymeSignature(line) {
   
   // Get last word, strip punctuation
   const words = line.trim().split(/\s+/);
-  const lastWord = words[words.length - 1]
+  const lastWord = words[words.length - 1].replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
     .toLowerCase()
     .replace(/[^a-z']/g, '');
   
@@ -34,7 +34,7 @@ async function checkRhymes(line, rhymeWord) {
   if (!line || !rhymeWord) return { ok: true, message: null };
 
   const words = line.trim().split(/\s+/);
-  const lastWord = words[words.length - 1]
+  const lastWord = words[words.length - 1].replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
     .toLowerCase()
     .replace(/[^a-z']/g, '');
 
