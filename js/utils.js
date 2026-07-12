@@ -11,32 +11,37 @@ function poemUrl(slug) {
   return `poem.html?id=${slug}&t=${Date.now()}`;
 }
 function getRhymeHint(line, allLines) {
-  // Haiku - truly unrhymed, no letter
   if (!line.rhyme_group) return 'unrhymed';
   
-  const letter = line.rhyme_group.replace(/\d+$/, '').toLowerCase(); 
-
-  // Check if any other line shares this rhyme group
+  const letter = line.rhyme_group.replace(/\d+$/, '').toLowerCase();
+  
   const groupHasRhyme = allLines.some(l => 
     l.rhyme_group === line.rhyme_group && l.is_rhyme_determining
   );
   
-  // Line has a positional letter but doesn't rhyme
   if (!groupHasRhyme && !line.is_rhyme_determining) {
-    return `(${letter}) free`;
+    return `(${letter}) unrhymed`;
   }
   
-  // Rhyme-determining line
   if (line.is_rhyme_determining) {
     return `sets the (${letter}) rhyme`;
   }
   
-  // Non-determining line with known rhyme word
-  if (line.rhyme_phonemes) {
-    return `rhymes with \u201c${line.rhyme_phonemes}\u201d (${letter})`;
+  // Try to find rhyme word from the determining line
+  const determiningLine = allLines.find(l => 
+    l.rhyme_group === line.rhyme_group && 
+    l.is_rhyme_determining && 
+    l.content
+  );
+  
+  // Use rhyme_phonemes if available, otherwise last word of determining line
+  const rhymeWord = line.rhyme_phonemes || 
+    (determiningLine?.content?.trim().split(/\s+/).pop()?.replace(/[^a-zA-Z]/g, '') || null);
+  
+  if (rhymeWord) {
+    return `rhymes with \u201c${rhymeWord}\u201d (${letter})`;
   }
   
-  // Non-determining line, rhyme not yet known
   return `(${letter}) rhyme`;
 }
 function getScansionGuide(footType, feetCount) {
@@ -62,10 +67,23 @@ function glossaryUrl(formName) {
 function obscureTitle(title) {
   if (!title) return null;
   const words = title.trim().split(/\s+/);
-  if (words.length <= 1) return title; // too short to obscure
-  const lastWord = words[words.length - 1];
-  const obscured = words.slice(0, -1).map(w => 
-    w.replace(/[a-zA-Z]/g, '·')
+  if (words.length <= 1) return title;
+  
+  // Find the last word that isn't just punctuation
+  let lastWordIndex = words.length - 1;
+  while (lastWordIndex > 0 && /^[^a-zA-Z0-9]+$/.test(words[lastWordIndex])) {
+    lastWordIndex--;
+  }
+  
+  const lastWord = words[lastWordIndex];
+  const obscured = words.slice(0, lastWordIndex).map(w => 
+    w.replace(/[a-zA-Z0-9]/g, '·')
   ).join(' ');
-  return `${obscured} ${lastWord}`;
+  const remaining = words.slice(lastWordIndex + 1).map(w =>
+    w.replace(/[a-zA-Z0-9]/g, '·')
+  ).join(' ');
+  
+  return remaining 
+    ? `${obscured} ${lastWord} ${remaining}`
+    : `${obscured} ${lastWord}`;
 }
