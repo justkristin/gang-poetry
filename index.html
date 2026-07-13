@@ -86,6 +86,7 @@
 
           <template x-if="stats.latestTitle">
             <div>
+              <h3>Most recently completed</h3>
               <p class="latest-poem">
                 <a :href="poemUrl(stats.latestSlug)"
                    x-text="`\u201c${stats.latestTitle}\u201d`"></a>
