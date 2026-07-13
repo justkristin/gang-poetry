@@ -136,11 +136,11 @@
                   <div style="margin-bottom: 0.5rem;">
                     <template x-for="poem in formGroup.poems" :key="poem.slug">
                       <p class="latest-poem">
-                        🏅 <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
-                        <span class="form-tag" x-text="formGroup.form"></span>
+                        🏅 <span class="form-tag" x-text="formGroup.form"></span>
+                        <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
                         <span class="like-count">♥ <span x-text="poem.like_count"></span></span>
                       </p>
-                    </template>
+                    </template> 
                   </div>
                 </template>
               </div>
