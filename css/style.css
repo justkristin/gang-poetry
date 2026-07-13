@@ -979,3 +979,7 @@ footer {
   outline: none;
   border-color: var(--color-primary);
 }
+
+h3 {
+  font-weight: 700;
+}
