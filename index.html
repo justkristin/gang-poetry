@@ -77,12 +77,60 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Activity + Recent activity -->
+       <!-- RIGHT COLUMN: Activity + Recent activity -->
       <div>
         <div class="panel" style="margin-bottom: 1.5rem;">
-         <img src="crows.png" alt="Gang Poetry"
+          <img src="jincy.png" alt="Jincy's Gang"
                style="width: 100%; border-radius: 4px; margin-bottom: 1rem;">
           <h2>Activity</h2>
+
+          <template x-if="stats.latestTitle">
+            <div>
+              <p class="latest-poem">
+                <a :href="poemUrl(stats.latestSlug)"
+                   x-text="`\u201c${stats.latestTitle}\u201d`"></a>
+                <span class="form-tag" x-text="stats.latestForm"></span>
+              </p>
+              <p style="margin-top: 0.5rem;">
+                <a href="browse.html" style="font-size: 0.85rem;">Browse all completed →</a>
+              </p>
+            </div>
+          </template>
+
+          <!-- Most Loved -->
+          <template x-if="mostLovedOverall.length > 0">
+            <div>
+              <hr class="panel-divider">
+              <h3>Most Loved Poem Overall</h3>
+              <template x-for="poem in mostLovedOverall" :key="poem.slug">
+                <p class="latest-poem">
+                  🏆 <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
+                  <span class="form-tag" x-text="poem.form_name + (poem.form_variant ? ' (' + poem.form_variant + ')' : '')"></span>
+                  <span class="like-count">♥ <span x-text="poem.like_count"></span></span>
+                </p>
+              </template>
+
+              <template x-if="mostLovedByForm.length > 0">
+                <div>
+                  <hr class="panel-divider">
+                  <h3>Most Loved by Form</h3>
+                  <template x-for="formGroup in mostLovedByForm" :key="formGroup.form">
+                    <div style="margin-bottom: 0.5rem;">
+                      <template x-for="poem in formGroup.poems" :key="poem.slug">
+                        <p class="latest-poem">
+                          🏅 <span class="form-tag" x-text="formGroup.form"></span>
+                          <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
+                          <span class="like-count">♥ <span x-text="poem.like_count"></span></span>
+                        </p>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+
+              <hr class="panel-divider">
+            </div>
+          </template>
 
           <div class="activity-stat">
             <span class="number" x-text="stats.completed"></span>
@@ -99,56 +147,8 @@
             <span class="label">open to new contributors</span>
           </div>
 
-          <template x-if="stats.latestTitle">
-            <div>
-              <hr class="panel-divider">
-              <h3>Latest completed</h3>
-              <p class="latest-poem">
-                <a :href="poemUrl(stats.latestSlug)"
-                   x-text="`\u201c${stats.latestTitle}\u201d`"></a>
-                <span class="form-tag" x-text="stats.latestForm"></span>
-              </p>
-              <p style="margin-top: 0.5rem;">
-                <a href="browse.html" style="font-size: 0.85rem;">Browse all completed →</a>
-              </p>
-            </div>
-          </template>
         </div>
-
-        <!-- Most Loved -->
-        <template x-if="mostLovedOverall.length > 0">
-          <div class="panel" style="margin-bottom: 1.5rem;">
-            
-            <h3>Most Loved Poem Overall</h3>
-            <template x-for="poem in mostLovedOverall" :key="poem.slug">
-              <p class="latest-poem">
-                🏆 <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
-                <span class="form-tag" x-text="poem.form_name + (poem.form_variant ? ' (' + poem.form_variant + ')' : '')"></span>
-                <span class="like-count">♥ <span x-text="poem.like_count"></span></span>
-              </p>
-            </template>
-        
-            <template x-if="mostLovedByForm.length > 0">
-              <div>
-                <hr class="panel-divider">
-                <h3>Most Loved by Form</h3>
-                <template x-for="formGroup in mostLovedByForm" :key="formGroup.form">
-                  <div style="margin-bottom: 0.5rem;">
-                    <template x-for="poem in formGroup.poems" :key="poem.slug">
-                      <p class="latest-poem">
-                        🏅 <span class="form-tag" x-text="formGroup.form"></span>
-                        <a :href="poemUrl(poem.slug)" x-text="`\u201c${poem.title}\u201d`"></a>
-                        <span class="like-count">♥ <span x-text="poem.like_count"></span></span>
-                      </p>
-                    </template> 
-                  </div>
-                </template>
-              </div>
-            </template>
-        
-          </div>
-        </template>
-        
+ 
         <!-- Recent activity -->
         <template x-if="userPoems.length > 0">
           <div class="panel">
