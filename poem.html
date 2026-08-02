@@ -788,16 +788,25 @@ async generateTeaserImage() {
   canvas.height = size;
   const ctx = canvas.getContext('2d');
 
+  const fancyPoetaster = true; // set to false to back out
+
   const purple = '#741f8a';
+  const grey = '#666666';
+  const dark = '#333333';
   const outerBorder = 15;
   const gap = 15;
   const dotBorderOffset = outerBorder + gap;
+  const leftX = 80;
+  const contentWidth = size - leftX * 2;
 
   // Load fonts
   await Promise.all([
     document.fonts.load('bold 48px Lora'),
     document.fonts.load('italic 52px Lora'),
     document.fonts.load('400 32px Lato'),
+    document.fonts.load('bold 32px Lato'),
+    document.fonts.load('italic 28px Lato'),
+    document.fonts.load('bold italic 28px Lato'),
   ]);
 
   // White background
@@ -821,7 +830,7 @@ async generateTeaserImage() {
   );
   ctx.setLineDash([]);
 
-  // Load favicon image
+  // Load favicon
   const faviconImg = await new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -829,31 +838,29 @@ async generateTeaserImage() {
     img.src = 'favicon-96x96.png';
   });
 
-  // Content area starts here
-  let y = 90;
-  const leftX = 80;
-  const contentWidth = size - leftX * 2;
+  let y = 100;
+  ctx.textBaseline = 'top';
 
-  // Header: favicon + site name + tagline
+  // ── HEADER ──────────────────────────────────────
   const faviconSize = 64;
   if (faviconImg) {
     ctx.drawImage(faviconImg, leftX, y, faviconSize, faviconSize);
   }
+  const headerX = leftX + (faviconImg ? faviconSize + 16 : 0);
 
-  // Site name (purple, Lora bold)
+  // Site name
   ctx.fillStyle = purple;
   ctx.font = 'bold 44px Lora, Georgia, serif';
-  ctx.textBaseline = 'top';
-  ctx.fillText(CONFIG.siteName, leftX + (faviconImg ? faviconSize + 16 : 0), y + 4);
+  ctx.fillText(CONFIG.siteName, headerX, y + 4);
 
-  // Tagline (grey, Lato)
-  ctx.fillStyle = '#666666';
+  // Tagline
+  ctx.fillStyle = grey;
   ctx.font = '28px Lato, Arial, sans-serif';
-  ctx.fillText('A collaborative poetry experiment', leftX + (faviconImg ? faviconSize + 16 : 0), y + 52);
+  ctx.fillText('A collaborative poetry experiment', headerX, y + 54);
 
-  y += 110;
+  y += 120;
 
-  // Divider line
+  // ── DIVIDER ─────────────────────────────────────
   ctx.strokeStyle = '#e0e0e0';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -863,7 +870,23 @@ async generateTeaserImage() {
 
   y += 60;
 
-  // Poem title (purple, Lora italic, quoted, word-wrapped)
+  // ── "presents this poetaster" ────────────────────
+  ctx.fillStyle = grey;
+  if (fancyPoetaster) {
+    ctx.font = '28px Lato, Arial, sans-serif';
+    const prefix = 'presents this poe';
+    ctx.fillText(prefix, leftX, y);
+    const prefixWidth = ctx.measureText(prefix).width;
+    ctx.font = 'bold italic 28px Lato, Arial, sans-serif';
+    ctx.fillText('taster', leftX + prefixWidth, y);
+  } else {
+    ctx.font = '28px Lato, Arial, sans-serif';
+    ctx.fillText('presents this poetaster', leftX, y);
+  }
+
+  y += 70;
+
+  // ── POEM TITLE ───────────────────────────────────
   ctx.fillStyle = purple;
   ctx.font = 'italic 52px Lora, Georgia, serif';
   const titleText = `\u201c${this.poem.title}\u201d`;
@@ -873,19 +896,33 @@ async generateTeaserImage() {
     y += 64;
   });
 
-  y += 30;
+  y += 16;
 
-  // Form name + like count
-  ctx.fillStyle = '#333333';
+  // ── FORM · LIKES ─────────────────────────────────
+  ctx.fillStyle = grey;
   ctx.font = '32px Lato, Arial, sans-serif';
-  const formText = this.poem.gp_forms.name +
-    (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '') +
-    (this.likeCount >= 1 ? `   ♥ ${this.likeCount}` : '');
+  const formName = this.poem.gp_forms.name +
+    (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '');
+  const formText = this.likeCount >= 1
+    ? `${formName} · ♥ ${this.likeCount}`
+    : formName;
   ctx.fillText(formText, leftX, y);
 
   y += 80;
 
-  // Divider line
+  // ── DESCRIPTION ──────────────────────────────────
+  ctx.fillStyle = grey;
+  ctx.font = '26px Lato, Arial, sans-serif';
+  const description = 'A collaborative exquisite corpse poem, in which each line was written by a poet who had no knowledge of what came before, other than rhyme and scansion hints.';
+  const descLines = wrapText(ctx, description, contentWidth);
+  descLines.forEach(line => {
+    ctx.fillText(line, leftX, y);
+    y += 36;
+  });
+
+  y += 60;
+
+  // ── DIVIDER ─────────────────────────────────────
   ctx.strokeStyle = '#e0e0e0';
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -895,20 +932,25 @@ async generateTeaserImage() {
 
   y += 50;
 
-  // URL
-  ctx.fillStyle = '#666666';
+  // ── URL ──────────────────────────────────────────
+  ctx.fillStyle = grey;
   ctx.font = '28px Lato, Arial, sans-serif';
-  ctx.fillText('Read it at:', leftX, y);
-  y += 40;
+  ctx.fillText('Read it \u2014 and join in \u2014 at:', leftX, y);
+
+  y += 42;
+
   ctx.fillStyle = purple;
   ctx.font = 'bold 28px Lato, Arial, sans-serif';
-  ctx.fillText(window.location.hostname, leftX, y);
+  const fullUrl = `${window.location.hostname}/poem.html?id=${this.poem.slug}`;
+  ctx.fillText(fullUrl, leftX, y);
 
-  // Download or share
+  // ── DOWNLOAD / SHARE ─────────────────────────────
   const filename = `${(this.poem.title || 'poem').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
-  
+
   canvas.toBlob(async (blob) => {
-    if (navigator.share && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+    if (navigator.share && navigator.canShare({
+      files: [new File([blob], filename, { type: 'image/png' })]
+    })) {
       await navigator.share({
         files: [new File([blob], filename, { type: 'image/png' })],
         title: this.poem.title,
@@ -926,14 +968,14 @@ async generateTeaserImage() {
 
 copyPoemText() {
   const title = this.poem.title || '';
-  const form = this.poem.gp_forms.name + (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '');
+  const form = this.poem.gp_forms.name + 
+    (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '');
   const lines = this.lines.map(l => l.content).join('\n');
-  const url = window.location.href.split('?')[0] + '?id=' + this.poem.slug;
-  
-  const text = `"${title}"\n${form}\n\n${lines}\n\n— ${CONFIG.siteName}\n${url}`;
-  
+  const url = `${window.location.hostname}/poem.html?id=${this.poem.slug}`;
+
+  const text = `"${title}"\n${form}\n\n${lines}\n\n— ${CONFIG.siteName}\nRead it — and join in — at: ${url}`;
+
   navigator.clipboard.writeText(text).then(() => {
-    // Brief visual feedback
     const btn = document.querySelector('.copy-btn');
     if (btn) {
       btn.textContent = '✓ Copied!';
