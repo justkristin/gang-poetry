@@ -202,6 +202,7 @@
               gp_lines(id, is_locked)
             `)
             .eq('status', 'in_progress')
+            .eq('flagged', false)
             .eq('visibility', 'public')
             .gt('last_touched', '2000-01-01')    // ← cache buster
             .order(orderColumn, { ascending })
