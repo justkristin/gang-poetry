@@ -151,6 +151,20 @@
             @click="sharePoem()">
             ↗ Share
           </button>
+
+          <!-- Teaser image button -->
+          <button
+            class="action-btn teaser-btn"
+            @click="generateTeaserImage()">
+            🖼️ Teaser
+          </button>
+
+          <!-- Copy poem button -->
+          <button
+            class="action-btn copy-btn"
+            @click="copyPoemText()">
+            📋 Copy poem
+          </button>
         
           <!-- Report button -->
           <template x-if="!userHasReported">
@@ -328,6 +342,22 @@
   </footer>
 
   <script>
+    function wrapText(ctx, text, maxWidth) {
+      const words = text.split(' ');
+      const lines = [];
+      let current = '';
+      words.forEach(word => {
+        const test = current ? `${current} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && current) {
+          lines.push(current);
+          current = word;
+        } else {
+          current = test;
+        }
+      });
+      if (current) lines.push(current);
+      return lines;
+    }
     function app() {
       return {
         loading: true,
@@ -749,6 +779,167 @@ async sharePoem() {
     navigator.clipboard.writeText(url)
       .then(() => alert('URL copied!'));
   }
+},
+
+async generateTeaserImage() {
+  const canvas = document.createElement('canvas');
+  const size = 1080;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  const purple = '#741f8a';
+  const outerBorder = 15;
+  const gap = 15;
+  const dotBorderOffset = outerBorder + gap;
+
+  // Load fonts
+  await Promise.all([
+    document.fonts.load('bold 48px Lora'),
+    document.fonts.load('italic 52px Lora'),
+    document.fonts.load('400 32px Lato'),
+  ]);
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+
+  // Outer solid purple border
+  ctx.strokeStyle = purple;
+  ctx.lineWidth = outerBorder * 2;
+  ctx.strokeRect(0, 0, size, size);
+
+  // Inner dotted purple border
+  ctx.strokeStyle = purple;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([6, 8]);
+  ctx.strokeRect(
+    dotBorderOffset,
+    dotBorderOffset,
+    size - dotBorderOffset * 2,
+    size - dotBorderOffset * 2
+  );
+  ctx.setLineDash([]);
+
+  // Load favicon image
+  const faviconImg = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = 'favicon-96x96.png';
+  });
+
+  // Content area starts here
+  let y = 90;
+  const leftX = 80;
+  const contentWidth = size - leftX * 2;
+
+  // Header: favicon + site name + tagline
+  const faviconSize = 64;
+  if (faviconImg) {
+    ctx.drawImage(faviconImg, leftX, y, faviconSize, faviconSize);
+  }
+
+  // Site name (purple, Lora bold)
+  ctx.fillStyle = purple;
+  ctx.font = 'bold 44px Lora, Georgia, serif';
+  ctx.textBaseline = 'top';
+  ctx.fillText(CONFIG.siteName, leftX + (faviconImg ? faviconSize + 16 : 0), y + 4);
+
+  // Tagline (grey, Lato)
+  ctx.fillStyle = '#666666';
+  ctx.font = '28px Lato, Arial, sans-serif';
+  ctx.fillText('A collaborative poetry experiment', leftX + (faviconImg ? faviconSize + 16 : 0), y + 52);
+
+  y += 110;
+
+  // Divider line
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(leftX, y);
+  ctx.lineTo(size - leftX, y);
+  ctx.stroke();
+
+  y += 60;
+
+  // Poem title (purple, Lora italic, quoted, word-wrapped)
+  ctx.fillStyle = purple;
+  ctx.font = 'italic 52px Lora, Georgia, serif';
+  const titleText = `\u201c${this.poem.title}\u201d`;
+  const titleLines = wrapText(ctx, titleText, contentWidth);
+  titleLines.forEach(line => {
+    ctx.fillText(line, leftX, y);
+    y += 64;
+  });
+
+  y += 30;
+
+  // Form name + like count
+  ctx.fillStyle = '#333333';
+  ctx.font = '32px Lato, Arial, sans-serif';
+  const formText = this.poem.gp_forms.name +
+    (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '') +
+    (this.likeCount >= 1 ? `   ♥ ${this.likeCount}` : '');
+  ctx.fillText(formText, leftX, y);
+
+  y += 80;
+
+  // Divider line
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(leftX, y);
+  ctx.lineTo(size - leftX, y);
+  ctx.stroke();
+
+  y += 50;
+
+  // URL
+  ctx.fillStyle = '#666666';
+  ctx.font = '28px Lato, Arial, sans-serif';
+  ctx.fillText('Read it at:', leftX, y);
+  y += 40;
+  ctx.fillStyle = purple;
+  ctx.font = 'bold 28px Lato, Arial, sans-serif';
+  ctx.fillText(window.location.hostname, leftX, y);
+
+  // Download or share
+  const filename = `${(this.poem.title || 'poem').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
+  
+  canvas.toBlob(async (blob) => {
+    if (navigator.share && navigator.canShare({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+      await navigator.share({
+        files: [new File([blob], filename, { type: 'image/png' })],
+        title: this.poem.title,
+      });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  });
+},
+
+copyPoemText() {
+  const title = this.poem.title || '';
+  const form = this.poem.gp_forms.name + (this.poem.gp_forms.variant ? ` (${this.poem.gp_forms.variant})` : '');
+  const lines = this.lines.map(l => l.content).join('\n');
+  const url = window.location.href.split('?')[0] + '?id=' + this.poem.slug;
+  
+  const text = `"${title}"\n${form}\n\n${lines}\n\n— ${CONFIG.siteName}\n${url}`;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    // Brief visual feedback
+    const btn = document.querySelector('.copy-btn');
+    if (btn) {
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy poem', 2000);
+    }
+  });
 },
 
 startPolling() {
