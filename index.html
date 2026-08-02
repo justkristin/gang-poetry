@@ -320,7 +320,8 @@
           const { count: completed } = await supabaseClient
             .from('gp_poems')
             .select('*', { count: 'exact', head: true })
-            .eq('status', 'complete');
+            .eq('status', 'complete')
+            .eq('flagged', false);
 
           // In progress count
           const { count: inProgress } = await supabaseClient
@@ -338,8 +339,9 @@
           // Latest completed poem
           const { data: latest } = await supabaseClient
             .from('gp_poems')
-            .select('title, slug, gp_forms(name, variant)')
+	    .select('title, slug, gp_forms(name, variant)')
             .eq('status', 'complete')
+            .eq('flagged', false)
             .order('completed_at', { ascending: false })
             .limit(1)
             .gt('completed_at', '2000-01-01')
