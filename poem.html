@@ -255,8 +255,18 @@
                     <template x-if="line.syllable_min && line.syllable_max">
                       <span>&nbsp; · &nbsp;<span x-text="line.syllable_min"></span>–<span x-text="line.syllable_max"></span> syllables</span>
                     </template>
-                    <template x-if="getScansionGuide(line.foot_type, line.feet_count)">
+                    <!-- Scansion: plain for locked/future lines -->
+                    <template x-if="getScansionGuide(line.foot_type, line.feet_count) && line.line_number !== currentLineNumber">
                       <span>&nbsp; · &nbsp;<span x-text="getScansionGuide(line.foot_type, line.feet_count)"></span></span>
+                    </template>
+                    <!-- Scansion: clickable with ℹ for current editable line -->
+                    <template x-if="getScansionGuide(line.foot_type, line.feet_count) && line.line_number === currentLineNumber">
+                      <span>&nbsp; · &nbsp;<span
+                        class="scansion-info"
+                        @click="showRhythmExample = !showRhythmExample">
+                        <span x-text="getScansionGuide(line.foot_type, line.feet_count)"></span>
+                        <i class="info-icon">i</i>
+                      </span>
                     </template>
                     <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line, lines)"></span></span>
                   </span>
@@ -273,6 +283,13 @@
                 <!-- Current editable line -->
                 <template x-if="!line.is_locked && line.line_number === currentLineNumber">
                   <div>
+                    <!-- Rhythm example drawer -->
+                    <template x-if="showRhythmExample && getRhythmExample(line.foot_type, line.feet_count)">
+                      <div class="rhythm-drawer" @click="showRhythmExample = false">
+                        <span x-html="getRhythmExample(line.foot_type, line.feet_count)"></span>
+                        <span class="rhythm-drawer-close">tap to close</span>
+                      </div>
+                    </template>
                     <input
                       type="text"
                       class="line-input"
@@ -385,6 +402,7 @@
         reportReason: '',
         showReportForm: false,
         sharing: false,
+        showRhythmExample: false,
 
         async init() {
           const params = new URLSearchParams(window.location.search);
@@ -494,6 +512,19 @@
         obscureLine(content) {
           if (!content) return '';
           return content.replace(/[a-zA-Z]/g, '·');
+        },
+        getRhythmExample(footType, feetCount) {
+          if (footType === 'iambic' && feetCount === 5)
+            return 'I <b>am</b> a <b>pi</b>rate <b>with</b> a <b>woo</b>den <b>leg</b>';
+          if (footType === 'iambic' && feetCount === 4)
+            return 'A<b>ma</b>zing <b>grace</b>, how <b>sweet</b> the <b>sound</b>';
+          if (footType === 'iambic' && feetCount === 3)
+            return 'that <b>saved</b> a <b>wretch</b> like <b>me</b>';
+          if (footType === 'anapestic' && feetCount === 3)
+            return 'un-der-<b>STAND</b> un-der-<b>STAND</b> un-der-<b>STAND</b>';
+          if (footType === 'anapestic' && feetCount === 2)
+            return 'un-der-<b>STAND</b> un-der-<b>STAND</b>';
+          return null;
         },
         async validateLine() {
           const line = this.lines.find(l => l.line_number === this.currentLineNumber);

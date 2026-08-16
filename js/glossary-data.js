@@ -8,7 +8,14 @@ const GLOSSARY = [
   },
   {
     term: "Ballad meter",
-    definition: "A common metrical pattern alternating lines of 8 and 6 syllables (iambic tetrameter and iambic trimeter), used in folk ballads and hymns. Emily Dickinson used this form extensively, often with slant rhyme.",
+    definition: 'A common metrical pattern alternating lines of 8 and 6 syllables ' +
+      '(iambic tetrameter and iambic trimeter), used in folk ballads and hymns. ' +
+      'Emily Dickinson used this form extensively, often with slant rhyme.',
+    example: 'The first verse of "Amazing Grace" is a perfect example: ' +
+      '"A<b>ma</b>zing <b>grace</b>, how <b>sweet</b> the <b>sound</b> / ' +
+      'that <b>saved</b> a <b>wretch</b> like <b>me</b>! / ' +
+      'I <b>once</b> was <b>lost</b> but <b>now</b> am <b>found</b>, / ' +
+      'was <b>blind</b> but <b>now</b> I <b>see</b>."',
     related: ["Iamb", "Meter", "Stanza", "Quatrain"],
     more_info: "https://www.poetryfoundation.org/learn/glossary-terms/ballad"
   },
@@ -56,7 +63,13 @@ const GLOSSARY = [
   },
   {
     term: "Limerick",
-    definition: "A five-line comic form with an AABBA rhyme scheme. Lines 1, 2, and 5 are longer (7-9 syllables) and lines 3 and 4 are shorter (5-7 syllables), with an anapestic rhythm. Traditionally humorous or bawdy.",
+    definition: 'A five-line comic form with an AABBA rhyme scheme. ' +
+      'Lines 1, 2, and 5 are longer (7–9 syllables) and lines 3 and 4 are shorter (5–7 syllables), ' +
+      'with an anapestic rhythm — three weak syllables leading to a strong beat (da-da-DUM). ' +
+      'Traditionally humorous or bawdy.',
+    example: 'The word "understand" is one anapest: un-der-STAND. ' +
+      'Long lines have three: "un-der-STAND un-der-STAND un-der-STAND." ' +
+      'Short lines have two: "un-der-STAND un-der-STAND."',
     related: ["Rhyme scheme", "Anapest"],
     more_info: "https://www.poetryfoundation.org/learn/glossary-terms/limerick"
   },
@@ -98,7 +111,12 @@ const GLOSSARY = [
   },
   {
     term: "Sonnet",
-    definition: "A 14-line poem in iambic pentameter. The Shakespearean (English) sonnet uses ABAB CDCD EFEF GG. The Petrarchan (Italian) sonnet uses ABBAABBA for the octave followed by a sestet. Both forms traditionally explore love, time, or mortality.",
+    definition: 'A 14-line poem in iambic pentameter (five da-DUM beats per line). ' +
+      'The Shakespearean (English) sonnet uses ABAB CDCD EFEF GG rhyme scheme. ' +
+      'The Petrarchan (Italian) sonnet uses ABBAABBA for the octave followed by a sestet. ' +
+      'Both forms traditionally explore love, time, or mortality.',
+    example: 'An example of iambic pentameter: ' +
+      '"I <b>am</b> a <b>pi</b>rate <b>with</b> a <b>woo</b>den <b>leg</b>."',
     related: ["Iambic pentameter", "Rhyme scheme", "Octave", "Sestet", "Quatrain"],
     more_info: "https://www.poetryfoundation.org/learn/glossary-terms/sonnet"
   },

@@ -995,3 +995,68 @@ h3 {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
+
+/* =============================================
+   GLOSSARY EXAMPLE CALLOUT
+   ============================================= */
+.example-callout {
+  background-color: #f5eef8;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 4px 4px 0;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.example-callout em {
+  font-style: italic;
+}
+
+.scansion-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: var(--color-text-light);
+}
+
+.scansion-info:hover {
+  color: var(--color-primary);
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 9px;
+  font-style: normal;
+  font-family: var(--font-sans);
+  line-height: 1;
+}
+
+.rhythm-drawer {
+  background-color: #f5eef8;
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 4px 4px 0;
+  padding: 0.5rem 0.75rem;
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rhythm-drawer-close {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

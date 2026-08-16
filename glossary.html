@@ -92,6 +92,9 @@
           <div class="glossary-entry panel">
             <div class="glossary-term" x-text="entry.term"></div>
             <p class="glossary-definition" x-text="entry.definition"></p>
+            <template x-if="entry.example">
+              <div class="example-callout" x-html="entry.example"></div>
+            </template>
             <div class="glossary-footer">
               <template x-if="entry.related && entry.related.length > 0">
                 <div class="glossary-related">
