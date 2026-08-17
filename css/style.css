@@ -1060,3 +1060,11 @@ h3 {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+.reviewed-badge {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-family: var(--font-sans);
+  margin-top: 0.25rem;
+  cursor: help;
+}
