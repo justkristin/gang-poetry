@@ -1,6 +1,13 @@
 // js/glossary-data.js
 const GLOSSARY = [
   {
+    term: 'Acrostic',
+    definition: 'A poem in which the first letter of each line, read vertically, spells out a word, name, or phrase. The word can be chosen by the poem\'s initiator and shapes the entire structure of the piece.',
+    example: 'Lewis Carroll\'s "A Boat Beneath a Sunny Sky" (1871) is a famous acrostic spelling out ALICE PLEASANCE LIDDELL — the full name of the girl who inspired Alice in Wonderland.',
+    related: ['Free verse'],
+    more_info: 'https://www.poetryfoundation.org/poems/43907/a-boat-beneath-a-sunny-sky'
+  },
+  {
     term: "Anapest",
     definition: "A metrical foot of three syllables — two unstressed followed by one stressed (da-da-DUM), as in 'un-der-STAND' or 'in-ter-VENE'. Common in limericks and comic verse.",
     related: ["Foot", "Meter", "Limerick"],
