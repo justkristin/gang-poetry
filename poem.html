@@ -137,7 +137,14 @@
           <template x-for="(stanza, si) in stanzas" :key="si">
             <div class="stanza">
               <template x-for="line in stanza" :key="line.line_number">
-                <p x-text="line.content"></p>
+                <p>
+                  <template x-if="line.required_first_letter">
+                    <span style="color: var(--color-primary); font-weight: bold;" x-text="line.content[0]"></span><span x-text="line.content.slice(1)"></span>
+                  </template>
+                  <template x-if="!line.required_first_letter">
+                    <span x-text="line.content"></span>
+                  </template>
+                </p>
               </template>
             </div>
           </template>
@@ -278,7 +285,12 @@
                         <i class="info-icon">i</i>
                       </span>
                     </template>
-                    <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line, lines)"></span></span>
+                    <template x-if="line.required_first_letter">
+                      <span>&nbsp; · &nbsp;starts with <strong x-text="line.required_first_letter"></strong></span>
+                    </template>
+                    <template x-if="!line.required_first_letter">
+                      <span>&nbsp; · &nbsp;<span x-text="getRhymeHint(line, lines)"></span></span>
+                    </template>
                   </span>
                 </div>
                 <!-- Locked line (previous lines) -->
@@ -306,8 +318,16 @@
                       x-model="currentContent"
                       @input="validateLine()"
                       :placeholder="`Enter line ${line.line_number}...`"
+                      maxlength="100"
                       autofocus>
-                    
+                    <!-- Character counter for acrostic -->
+                    <template x-if="poem.acrostic_word">
+                      <div style="display: flex; justify-content: flex-end; font-size: 0.75rem; margin-top: 0.25rem;">
+                        <span :style="currentContent.length > 85 ? 'color: #c0392b;' : 'color: var(--color-text-light);'"
+                              x-text="currentContent.length"></span>
+                        <span style="color: var(--color-text-light);">/100</span>
+                      </div>
+                    </template>
                     <!-- Syllable feedback -->
                     <template x-if="syllableWarning">
                       <p class="line-warning" x-text="syllableWarning"></p>
@@ -568,6 +588,15 @@
         async saveLine() {
           if (!this.currentContent.trim() || this.saving) return;
           this.saving = true;
+          // Hard validation for acrostic first letter
+          if (this.poem.acrostic_word) {
+            const required = this.lines.find(l => l.line_number === this.currentLineNumber)?.required_first_letter;
+            if (required && this.currentContent.trim()[0]?.toUpperCase() !== required) {
+              this.error = `This line must start with the letter ${required}.`;
+              this.saving = false;
+              return;
+            }
+          }
 
           // Check line is still available before saving
           const { data: freshLine } = await supabaseClient

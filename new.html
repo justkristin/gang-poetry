@@ -110,6 +110,26 @@
           </div>
         </template>
 
+        <!-- Acrostic word input -->
+        <template x-if="form.name === 'Acrostic'">
+          <div class="panel" style="margin-bottom: 1.5rem;">
+            <h2>What word should the poem spell out?</h2>
+            <p>Each line will begin with a successive letter of your word. (3–20 letters, no spaces or punctuation.)</p>
+            <input
+              type="text"
+              class="line-input"
+              x-model="acrosticWord"
+              @input="acrosticWord = acrosticWord.replace(/[^a-zA-Z]/g, '').slice(0, 20).toUpperCase()"
+              placeholder="e.g. AUTUMN"
+              style="font-size: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase;">
+            <p class="stanza-info" x-show="acrosticWord.length >= 3"
+               x-text="`${acrosticWord.length} lines · ${acrosticWord.length} contributors`"></p>
+            <p class="stanza-info" style="color: #c0392b;" x-show="acrosticWord.length > 0 && acrosticWord.length < 3">
+              Word must be at least 3 letters.
+            </p>
+          </div>
+        </template>
+
         <!-- Visibility selector -->
                 <div class="panel" style="margin-bottom: 1.5rem;">
           <h2>Who can join this poem?</h2>
@@ -183,6 +203,7 @@
         formDisplayName: '',
         showExample: false,
         stanzaCount: 2,
+        acrosticWord:'',
         atLimit: false,
         starting: false,
         visibility: 'public',
@@ -241,14 +262,20 @@
         },
 
         async startPoem() {
+          if (this.form.name === 'Acrostic' && this.acrosticWord.length < 3) {
+            this.error = 'Please enter a word of at least 3 letters.';
+            return;
+          }
           this.starting = true;
           const cookieId = getCookieId();
           const slug = generateSlug();
 
           // Calculate total lines
-          const totalLines = this.form.has_variable_length
-            ? this.stanzaCount * this.form.lines_per_stanza
-            : await this.getTotalLines();
+          const totalLines = this.form.name === 'Acrostic'
+            ? this.acrosticWord.length
+            : this.form.has_variable_length
+              ? this.stanzaCount * this.form.lines_per_stanza
+              : await this.getTotalLines();
 
           // Insert poem
           const { data: poem, error: poemError } = await supabaseClient
@@ -257,10 +284,11 @@
               slug,
               form_id: this.form.id,
               status: 'in_progress',
-              stanza_count: this.form.has_variable_length ? this.stanzaCount : null,
+              stanza_count: null,
               total_lines: totalLines,
               initiator_cookie: cookieId,
-              visibility: this.visibility
+              visibility: this.visibility,
+              acrostic_word: this.form.name === 'Acrostic' ? this.acrosticWord.toUpperCase() : null
             })
             .select()
             .single();
@@ -287,6 +315,25 @@
         },
 
         async createLines(poemId, totalLines) {
+          // Acrostic: create simple lines with required_first_letter
+          if (this.form.name === 'Acrostic') {
+            const lineRows = this.acrosticWord.toUpperCase().split('').map((letter, i) => ({
+              poem_id: poemId,
+              line_number: i + 1,
+              required_first_letter: letter,
+              syllable_count_expected: null,
+              syllable_min: null,
+              syllable_max: null,
+              rhyme_group: null,
+              is_rhyme_determining: false,
+              foot_type: null,
+              feet_count: null,
+              is_refrain: false,
+              stanza_position: null
+            }));
+            await supabaseClient.from('gp_lines').insert(lineRows);
+            return;
+          }
           // Get line templates for this form
           const { data: templates } = await supabaseClient
             .from('gp_form_line_templates')
