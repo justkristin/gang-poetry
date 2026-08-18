@@ -187,12 +187,23 @@
         </div>
       </div>
 
-      <div class="faq-item" :class="{ open: open === 11 }">
+      <div class="faq-item" id="reviewed" :class="{ open: open === 11 }">
         <button class="faq-question" @click="open = open === 11 ? null : 11">
-          Who do I contact with questions or concerns?
+          What does "✓ reviewed" mean on a poem?
           <span class="faq-chevron">▾</span>
         </button>
         <div class="faq-answer" x-show="open === 11" x-transition>
+          <p>Occasionally a poem receives enough community reports that it comes to our attention. When we look at a reported poem and decide it's acceptable, we mark it with a <strong>✓ reviewed</strong> badge.</p>
+          <p>This doesn't mean we think it's beyond criticism — if something concerns you, you're always welcome to report it and we'll take another look. We're human, we have blind spots, and we genuinely value your input.</p>
+        </div>
+      </div>
+
+      <div class="faq-item" :class="{ open: open === 12 }">
+        <button class="faq-question" @click="open = open === 12 ? null : 12">
+          Who do I contact with questions or concerns?
+          <span class="faq-chevron">▾</span>
+        </button>
+        <div class="faq-answer" x-show="open === 12" x-transition>
           <p>You can reach us at <a href="mailto:your@email.com">your@email.com</a>. We'd love to hear from you — especially if something isn't working, or if a poem made you laugh.</p>
         </div>
       </div>

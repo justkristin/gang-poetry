@@ -123,10 +123,15 @@
               about this form →
             </a>
           </p>
-          <template x-if="poem.reviewed">
-            <p class="reviewed-badge" title="This poem has been reviewed by a moderator and found acceptable. You are still welcome to report it if you have concerns.">
-              ✓ reviewed
+            <template x-if="poem.reviewed">
+            <p class="reviewed-badge">
+              <a href="faq.html#reviewed" 
+                 style="color: var(--color-text-light); text-decoration: none;"
+                 title="This poem has been reviewed by a moderator and found acceptable. You are still welcome to report it if you have concerns.">
+                ✓ reviewed
+              </a>
             </p>
+          </template>
           </template>
         <div class="revealed-poem">
           <template x-for="(stanza, si) in stanzas" :key="si">
