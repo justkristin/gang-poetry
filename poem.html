@@ -341,6 +341,11 @@
                       <p class="line-warning" x-text="rhymeWarning"></p>
                     </template>
 
+                    <!-- First letter warning for acrostic -->
+                    <template x-if="firstLetterWarning">
+                      <p class="line-warning" x-text="firstLetterWarning"></p>
+                    </template>
+
                     <!-- Inline save button -->
                     <div style="text-align: right; margin-top: 0.5rem;">
                       <button
@@ -416,6 +421,7 @@
         currentLineNumber: null,
         currentContent: '',
         syllableWarning: null,
+        firstLetterWarning: null,
         syllableOk: false,
         rhymeWarning: null,
         isLastContributor: false,
@@ -557,6 +563,12 @@
           return null;
         },
         async validateLine() {
+          // No validation for acrostic - first letter is handled on save
+             if (this.poem?.acrostic_word) {
+            this.firstLetterWarning = null;
+            return;
+          }
+ 
           const line = this.lines.find(l => l.line_number === this.currentLineNumber);
           if (!line || !this.currentContent.trim()) {
             this.syllableWarning = null;
@@ -592,7 +604,7 @@
           if (this.poem.acrostic_word) {
             const required = this.lines.find(l => l.line_number === this.currentLineNumber)?.required_first_letter;
             if (required && this.currentContent.trim()[0]?.toUpperCase() !== required) {
-              this.error = `This line must start with the letter ${required}.`;
+              this.firstLetterWarning = `This line must start with the letter ${required}.`;
               this.saving = false;
               return;
             }
