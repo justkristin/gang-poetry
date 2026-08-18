@@ -139,7 +139,7 @@
               <template x-for="line in stanza" :key="line.line_number">
                 <p>
                   <template x-if="line.required_first_letter">
-                    <span style="color: var(--color-primary); font-weight: bold;" x-text="line.content[0]"></span><span x-text="line.content.slice(1)"></span>
+                    <span x-html="line.content ? `<span style='color: #741f8a; font-weight: bold;'>${line.content[0]}</span>${line.content.slice(1)}` : ''"></span>
                   </template>
                   <template x-if="!line.required_first_letter">
                     <span x-text="line.content"></span>
