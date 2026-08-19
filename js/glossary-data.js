@@ -51,6 +51,13 @@ const GLOSSARY = [
     more_info: "https://www.poetryfoundation.org/learn/glossary-terms/foot"
   },
   {
+    term: 'Free Verse',
+    definition: 'Poetry that does not follow a fixed metrical pattern or rhyme scheme. The poet is free to vary line length, rhythm, and structure as the poem demands. Free verse became widely popular in the 19th century, particularly through Walt Whitman\'s "Leaves of Grass."',
+    example: 'William Carlos Williams\' "The Red Wheelbarrow" (1923) is a famous example: each image is stripped to its essentials, with no rhyme or meter — just the thing itself.',
+    related: ['Acrostic', 'Meter', 'Rhyme'],
+    more_info: 'https://www.poetryfoundation.org/learn/glossary-terms/free-verse'
+  },
+  {
     term: "Haiku",
     definition: "A Japanese poetic form of three lines with 5, 7, and 5 syllables respectively. Traditionally evokes a moment in nature, often with a seasonal reference (kigo) and a cutting word (kireji) that creates a pause or shift.",
     related: ["Syllable"],
