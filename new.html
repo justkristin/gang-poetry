@@ -130,6 +130,23 @@
           </div>
         </template>
 
+        <!-- Free verse line count selector -->
+        <template x-if="form.name === 'Free Verse'">
+          <div class="panel" style="margin-bottom: 1.5rem;">
+            <h2>How many lines?</h2>
+            <p>Each line will be written by a different contributor.</p>
+            <div style="padding: 0.5rem 0;">
+              <input 
+                type="range" 
+                min="3" 
+                max="20" 
+                x-model="freeVerseLines"
+                style="accent-color: #741f8a; width: 100%; margin-bottom: 0.75rem;">
+              <p class="stanza-info" x-text="`${freeVerseLines} lines · ${freeVerseLines} contributors`"></p>
+            </div>
+          </div>
+        </template>
+
         <!-- Visibility selector -->
                 <div class="panel" style="margin-bottom: 1.5rem;">
           <h2>Who can join this poem?</h2>
@@ -204,6 +221,7 @@
         showExample: false,
         stanzaCount: 2,
         acrosticWord:'',
+        freeVerseLines: 7,
         atLimit: false,
         starting: false,
         visibility: 'public',
@@ -273,9 +291,11 @@
           // Calculate total lines
           const totalLines = this.form.name === 'Acrostic'
             ? this.acrosticWord.length
-            : this.form.has_variable_length
-              ? this.stanzaCount * this.form.lines_per_stanza
-              : await this.getTotalLines();
+            : this.form.name === 'Free Verse'
+              ? parseInt(this.freeVerseLines)
+              : this.form.has_variable_length
+                ? this.stanzaCount * this.form.lines_per_stanza
+                : await this.getTotalLines();
 
           // Insert poem
           const { data: poem, error: poemError } = await supabaseClient
@@ -330,6 +350,25 @@
               feet_count: null,
               is_refrain: false,
               stanza_position: null
+            }));
+            await supabaseClient.from('gp_lines').insert(lineRows);
+            return;
+          }
+          // Free verse: create simple lines with no constraints
+          if (this.form.name === 'Free Verse') {
+            const lineRows = Array.from({ length: totalLines }, (_, i) => ({
+              poem_id: poemId,
+              line_number: i + 1,
+              syllable_count_expected: null,
+              syllable_min: null,
+              syllable_max: null,
+              rhyme_group: null,
+              is_rhyme_determining: false,
+              foot_type: null,
+              feet_count: null,
+              is_refrain: false,
+              stanza_position: null,
+              required_first_letter: null
             }));
             await supabaseClient.from('gp_lines').insert(lineRows);
             return;
